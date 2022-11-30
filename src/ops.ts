@@ -1,15 +1,11 @@
 
 /* IMPORT */
 
-import type {ActivationFN, Matrix} from './types';
+import type {Matrix} from './types';
 
 /* MAIN */
 
 // These functions are pure, arguments are never mutated and the output depends solely on the input
-
-// const activate = ( x: Matrix, activation: ActivationFN, derivative: boolean ): Matrix => { //TODO
-//   return map ( x, x => activation ( x, derivative ) );
-// };
 
 const abs = ( x: Matrix ): Matrix => {
   return map ( x, Math.abs );
@@ -17,6 +13,10 @@ const abs = ( x: Matrix ): Matrix => {
 
 const add = ( x: Matrix, y: Matrix ): Matrix => {
   return map2 ( x, y, ( x, y ) => x + y );
+};
+
+const clone = ( x: Matrix ): Matrix => {
+  return map ( x, x => x );
 };
 
 const create = ( rows: number, cols: number, value: number = 0 ): Matrix => {
@@ -35,6 +35,14 @@ const each = ( x: Matrix, iterator: ( x: number, row: number, col: number ) => v
   for ( let i = 0, l = x.length; i < l; i++ ) {
     for ( let j = 0, m = x[i].length; j < m; j++ ) {
       iterator ( x[i][j], i, j );
+    }
+  }
+};
+
+const each2 = ( x: Matrix, y: Matrix, iterator: ( x: number, y: number, row: number, col: number ) => number ): void => {
+  for ( let i = 0, l = x.length; i < l; i++ ) {
+    for ( let j = 0, m = x[i].length; j < m; j++ ) {
+      iterator ( x[i][j], y[i][j], i, j );
     }
   }
 };
@@ -123,4 +131,4 @@ const transpose = ( x: Matrix ): Matrix => {
 
 /* EXPORT */
 
-export {abs, add, create, divide, each, map, map2, mean, multiply, product, random, reduce, scale, subtract, sum, transpose};
+export {abs, add, clone, create, divide, each, each2, map, map2, mean, multiply, product, random, reduce, scale, subtract, sum, transpose};

@@ -7,7 +7,10 @@
   "main": "dist/index.js",
   "exports": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "sideEffects": false,
   "scripts": {
+    "benchmark": "tsex benchmark",
+    "benchmark:watch": "tsex benchmark --watch",
     "clean": "tsex clean",
     "compile": "tsex compile",
     "compile:watch": "tsex compile --watch",
@@ -25,6 +28,7 @@
     "network"
   ],
   "devDependencies": {
+    "benchloop": "^2.0.0",
     "esbuild": "^0.15.16",
     "fava": "^0.0.7",
     "tsex": "^1.1.4",

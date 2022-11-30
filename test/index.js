@@ -3,7 +3,8 @@
 
 import {describe} from 'fava';
 import {relu, sigmoid, softplus, tanh} from '../dist/activations.js';
-import {abs, add, create, divide, each, map, mean, multiply, product, random, reduce, scale, subtract, sum, transpose} from '../dist/ops.js';
+import {abs, add, clone, create, divide, each, each2, map, mean, multiply, product, random, reduce, scale, subtract, sum, transpose} from '../dist/ops.js';
+import NeuralNetwork from '../dist/neural_network.js';
 import ExampleXOR from '../examples/xor.js';
 
 /* MAIN */
@@ -92,6 +93,25 @@ describe ( 'Toygrad', () => {
         ];
 
         t.deepEqual ( add ( inputA, inputB ), output );
+
+      });
+
+    });
+
+    describe ( 'clone', it => {
+
+      it ( 'clones a matrix', t => {
+
+        const matrix = random ( 10, 20, -1, 1 );
+        const cmatrix = clone ( matrix );
+
+        t.true ( cmatrix.length === 10 );
+        t.true ( cmatrix.every ( row => row.length === 20 ) );
+        t.not ( matrix, cmatrix );
+
+        each2 ( matrix, cmatrix, ( a, b ) => {
+          t.is ( a, b );
+        });
 
       });
 
@@ -393,16 +413,94 @@ describe ( 'Toygrad', () => {
 
   });
 
-  describe ( 'example', () => {
+  describe ( 'nn', it => {
+
+    it ( 'can export the model as options and import it again', t => {
+
+      const nn1 = new NeuralNetwork ({
+        learningRate: .1,
+        layers: [
+          {
+            inputs: 2,
+            outputs: 4,
+            activation: 'sigmoid'
+          },
+          {
+            inputs: 4,
+            outputs: 1,
+            activation: 'sigmoid'
+          }
+        ]
+      });
+
+      const i00 = nn1.infer ( [0, 0] )[0];
+      const i10 = nn1.infer ( [1, 0] )[0];
+      const i01 = nn1.infer ( [0, 1] )[0];
+      const i11 = nn1.infer ( [1, 1] )[0];
+
+      const nn2 = new NeuralNetwork ( nn1.exportAsOptions () );
+
+      const o00 = nn2.infer ( [0, 0] )[0];
+      const o10 = nn2.infer ( [1, 0] )[0];
+      const o01 = nn2.infer ( [0, 1] )[0];
+      const o11 = nn2.infer ( [1, 1] )[0];
+
+      t.is ( i00, o00 );
+      t.is ( i10, o10 );
+      t.is ( i01, o01 );
+      t.is ( i11, o11 );
+
+    });
+
+    it ( 'can export the model as a standalone function', t => {
+
+      const nn1 = new NeuralNetwork ({
+        learningRate: .1,
+        layers: [
+          {
+            inputs: 2,
+            outputs: 4,
+            activation: 'sigmoid'
+          },
+          {
+            inputs: 4,
+            outputs: 1,
+            activation: 'sigmoid'
+          }
+        ]
+      });
+
+      const i00 = nn1.infer ( [0, 0] )[0];
+      const i10 = nn1.infer ( [1, 0] )[0];
+      const i01 = nn1.infer ( [0, 1] )[0];
+      const i11 = nn1.infer ( [1, 1] )[0];
+
+      const fn = nn1.exportAsFunction ();
+
+      const o00 = fn ( [0, 0] )[0];
+      const o10 = fn ( [1, 0] )[0];
+      const o01 = fn ( [0, 1] )[0];
+      const o11 = fn ( [1, 1] )[0];
+
+      t.is ( i00, o00 );
+      t.is ( i10, o10 );
+      t.is ( i01, o01 );
+      t.is ( i11, o11 );
+
+    });
+
+  });
+
+  describe ( 'examples', () => {
 
     describe ( 'xor', it => {
 
       it ( 'works', t => {
 
-        t.true ( ExampleXOR.predict ( [0, 0] )[0] < .1 );
-        t.true ( ExampleXOR.predict ( [1, 0] )[0] > .9 );
-        t.true ( ExampleXOR.predict ( [0, 1] )[0] > .9 );
-        t.true ( ExampleXOR.predict ( [1, 1] )[0] < .1 );
+        t.true ( ExampleXOR.infer ( [0, 0] )[0] < .1 );
+        t.true ( ExampleXOR.infer ( [1, 0] )[0] > .9 );
+        t.true ( ExampleXOR.infer ( [0, 1] )[0] > .9 );
+        t.true ( ExampleXOR.infer ( [1, 1] )[0] < .1 );
 
       });
 

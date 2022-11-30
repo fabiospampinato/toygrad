@@ -2,8 +2,8 @@
 /* IMPORT */
 
 import * as Activations from './activations';
-import {abs, add, map, mean, multiply, product, random, scale, subtract, transpose} from './ops';
-import type {ActivationFN, Matrix, Vector, Options} from './types';
+import {abs, add, clone, map, mean, multiply, product, random, scale, subtract, transpose} from './ops';
+import type {Identity, Matrix, Vector, Options, ResultForward, ResultBackward, ResultTrain} from './types';
 
 /* MAIN */
 
@@ -12,197 +12,154 @@ class NeuralNetwork {
   /* VARIABLES */
 
   options: Options;
-  activations: ActivationFN[];
-  weights: Matrix[];
+
+  activation0: Identity<number>;
+  activation1: Identity<number>;
+  activation0d: Identity<number>;
+  activation1d: Identity<number>;
+
+  weights0: Matrix;
+  weights1: Matrix;
 
   /* CONSTRUCTOR */
 
   constructor ( options: Options ) {
 
-    if ( options.layers.length < 2 ) throw new Error ( 'You need at least 1 input layer and 1 output layer' );
+    const layer0 = options.layers[0];
+    const layer1 = options.layers[1];
+    const activation0 = Activations[layer0.activation];
+    const activation1 = Activations[layer1.activation];
 
     this.options = options;
-    this.activations = options.layers.map ( layer => Activations[layer.activation] );
-    this.weights = options.layers.slice ( 0, -1 ).map ( ( layer, i ) => random ( layer.neurons, options.layers[i + 1].neurons, -1, 1 ) );
+
+    this.activation0 = x => activation0 ( x, false );
+    this.activation1 = x => activation1 ( x, false );
+    this.activation0d = x => activation0 ( x, true );
+    this.activation1d = x => activation1 ( x, true );
+
+    this.weights0 = layer0.weights || random ( layer0.inputs, layer0.outputs, -1, 1 );
+    this.weights1 = layer1.weights || random ( layer1.inputs, layer1.outputs, -1, 1 );
 
   }
 
-  /* API */
+  /* TRAINING/INFERENCE API */
 
-  trainSingle ( input: Vector, target: Vector, _log: boolean = false ): void {
+  forward ( inputs: Vector[] ): ResultForward {
 
-    /* FORWARD PASS */
+    const weighted0 = product ( inputs, this.weights0 );
+    const activated0 = map ( weighted0, this.activation0 );
+    const weighted1 = product ( activated0, this.weights1 );
+    const activated1 = map ( weighted1, this.activation1 );
+    const result: ResultForward = [weighted0, weighted1, activated0, activated1];
 
-    const layersLogits: Matrix[] = [];
-    const layersActivated: Matrix[] = [];
+    return result;
 
-    let layer = [input];
-    for ( let i = 0, l = this.weights.length; i < l; i++ ) {
-      const logits = product ( layer, this.weights[i] );
-      const activated = layer = map ( logits, x => this.activations[i + 1]( x, false ) );
-      layersLogits.push ( logits );
-      layersActivated.push ( activated );
+  }
+
+  backward ( inputs: Vector[], outputs: Vector[], forward: Matrix[] ): ResultBackward {
+
+    const [weighted0, weighted1, activated0, activated1] = forward;
+
+    const error1 = subtract ( outputs, activated1 ); //TODO: debug this
+    const gradient1 = multiply ( error1, map ( weighted1, this.activation0d ) );
+    const error0 = product ( gradient1, transpose ( this.weights1 ) );
+    const gradient0 = multiply ( error0, map ( weighted0, this.activation1d ) );
+    const result: ResultBackward = [error0, error1, gradient0, gradient1];
+
+    this.weights1 = add ( this.weights1, product ( transpose ( activated0 ), scale ( gradient1, this.options.learningRate ) ) );
+    this.weights0 = add ( this.weights0, product ( transpose ( inputs ), scale ( gradient0, this.options.learningRate ) ) );
+
+    return result;
+
+  }
+
+  trainSingle ( input: Vector, output: Vector ): ResultTrain {
+
+    return this.trainMultiple ( [input], [output] );
+
+  }
+
+  trainMultiple ( inputs: Vector[], outputs: Vector[] ): ResultTrain {
+
+    const forward = this.forward ( inputs );
+    const backward = this.backward ( inputs, outputs, forward );
+
+    return [forward, backward];
+
+  }
+
+  trainLoop ( iterations: number, train: ( i: number ) => ResultTrain | void ): void {
+
+    const logEnabled = true;
+    const logStep = Math.floor ( iterations / 1000 );
+
+    for ( let i = 0, s = 0; i < iterations; i++ ) {
+
+      const result = train ( i );
+
+      if ( logEnabled && result && ( i % logStep ) === 0 ) {
+
+        const percentage = ( ++s / 10 ).toFixed ( 1 );
+        const error = mean ( abs ( result[1][1] ) );
+
+        console.log ( `${percentage}% -`, error );
+
+      }
+
     }
 
-    // let layer = [input];
-    // const input_layer = [input];
-    // const hidden_layer_logits = product(input_layer, this.weights0);
-    // const hidden_layer_activated = map(hidden_layer_logits,v => this.activation(v, false));
-    // const output_layer_logits = product(hidden_layer_activated, this.weights1);
-    // const output_layer_activated = map(output_layer_logits,v => this.activation(v, false));
+  }
 
-    /* BACKWARD PASS */
+  infer ( input: Vector ): Vector {
 
-    const layersErrors: Matrix[] = [];
-    const layersGradients: Matrix[] = [];
-
-    layer = [target];
-    for ( let i = this.weights.length - 1; i >= 0; i-- ) {
-      const fn = ( i === this.weights.length - 1 ) ? subtract : product;
-      const error = fn ( layer, ( i === this.weights.length - 1 ) ? layersActivated[i] : transpose ( this.weights[i + 1] ) );
-      const gradient = layer = multiply ( error, map ( layersLogits[i], x => this.activations[i + 1]( x, true ) ) );
-      layersErrors.unshift ( error );
-      layersGradients.unshift ( gradient );
-    }
-
-    for ( let i = this.weights.length - 1; i >= 0; i-- ) {
-      this.weights[i] = add ( this.weights[i], product ( transpose ( layersActivated[i - 1] || [input] ), scale ( layersGradients[i], this.options.learningRate ) ) );
-    }
-
-    // const output_error = subtract(target, output_layer_activated);
-    // const output_delta = multiply(output_error, map(output_layer_logits,v => this.activation(v, true)));
-    // const hidden_error = product(output_delta, transpose(this.weights1));
-    // const hidden_delta = multiply(hidden_error, map(hidden_layer_logits,v => this.activation(v, true)));
-
-    // this.weights1 = add(this.weights1, product(transpose(hidden_layer_activated), scale(output_delta, this.options.learningRate)));
-    // this.weights0 = add(this.weights0, product(transpose(input_layer), scale(hidden_delta, this.options.learningRate)));
-
-    /* LOGGING */
-
-    if ( _log ) {
-      console.log ( `Mean error: ${mean ( abs ( layersErrors[layersErrors.length - 1] ) )}`);
-    }
+    return this.forward ( [input] )[3][0];
 
   }
 
-  predict ( input: Vector ): Vector {
+  /* EXPORT API */
 
-    let layer = [input];
-    for ( let i = 0, l = this.weights.length; i < l; i++ ) {
-      const logits = product ( layer, this.weights[i] );
-      const activated = layer = map ( logits, x => this.activations[i + 1]( x, false ) );
-    }
-    return layer[0];
+  exportAsFunction (): (( input: Vector ) => Vector) {
 
-    // const input_layer = [input];
-    // const hidden_layer = map(product(input_layer, this.weights0),v => this.activation(v, false));
-    // const output_layer = map(product(hidden_layer, this.weights1),v => this.activation(v, false));
-    // return output_layer[0] || [];
+    const fn = [
+      `(function _ ( input ) {` +
+        `if ( !_._ ) {` +
+          `_._ = true;` +
+          `_.p = ${product.toString ()};` +
+          `_.m = ${map.toString ()};` +
+          `_.a0 = ${Activations[this.options.layers[0].activation].toString ()};` +
+          `_.a1 = ${Activations[this.options.layers[1].activation].toString ()};` +
+          `_.w0 = JSON.parse ( '${JSON.stringify ( this.weights0 )}' );` +
+          `_.w1 = JSON.parse ( '${JSON.stringify ( this.weights1 )}' );` +
+        `}` +
+        `return _.m ( _.p ( _.m ( _.p ( [input], _.w0 ), _.a0 ), _.w1 ), _.a1 )[0];` +
+      `})`
+    ];
+
+    return eval ( fn.join ( '' ) );
+
   }
 
-  // predict(input) {
-  //   // let input_layer = input;
-  //   // let hidden_layer = product(input_layer, this.weights0).map(v => this.activation(v, false));
-  //   // let output_layer = product(hidden_layer, this.weights1).map(v => this.activation(v, false));
+  exportAsOptions (): Options {
 
-  //   const hiddenlayer2: number[] = [];
-  //   for ( let ci = 0, cl = this.weights0._data.length; ci < cl; ci++ ) {
-  //     for ( let i = 0, l = this.weights0._data[ci].length; i < l; i++ ) {
-  //       hiddenlayer2[i] ||= 0;
-  //       hiddenlayer2[i] += this.weights0._data[ci][i] * input._data[0][ci];
-  //     }
-  //   }
-  //   const hiddenlayer3 = hiddenlayer2.map(v => this.activation(v, false));
+    return {
+      learningRate: this.options.learningRate,
+      layers: [
+        {
+          inputs: this.options.layers[0].inputs,
+          outputs: this.options.layers[0].outputs,
+          activation: this.options.layers[0].activation,
+          weights: clone ( this.weights0 )
+        },
+        {
+          inputs: this.options.layers[1].inputs,
+          outputs: this.options.layers[1].outputs,
+          activation: this.options.layers[1].activation,
+          weights: clone ( this.weights1 )
+        }
+      ]
+    };
 
-  //   const outputlayer2: number[] = [];
-  //   for ( let ci = 0, cl = this.weights1._data.length; ci < cl; ci++ ) {
-  //     for ( let i = 0, l = this.weights1._data[ci].length; i < l; i++ ) {
-  //       outputlayer2[i] ||= 0;
-  //       outputlayer2[i] += this.weights1._data[ci][i] * hiddenlayer3[ci];
-  //     }
-  //   }
-  //   const outputlayer3 = outputlayer2.map(v => this.activation(v, false));
-
-  //   return outputlayer3;
-
-  // }
-
-}
-
-class _NeuralNetwork {
-
-  /* VARIABLES */
-
-  options: Options;
-  activation;
-  weights0;
-  weights1;
-
-  /* CONSTRUCTOR */
-
-  constructor ( options: Options ) {
-    this.options = options;
-    this.activation = Activations[options.activation];
-    this.weights0 = random ( options.inputLayer, options.hiddenLayer, -1.0, 1.0 );
-    this.weights1 = random ( options.hiddenLayer, options.outputLayer, -1.0, 1.0 );
   }
-
-  /* API */
-
-  trainSingle ( input: Vector, target: Vector ) {
-    target = [target]
-    const input_layer = [input];
-    const hidden_layer_logits = product(input_layer, this.weights0);
-    const hidden_layer_activated = map(hidden_layer_logits,v => this.activation(v, false));
-    const output_layer_logits = product(hidden_layer_activated, this.weights1);
-    const output_layer_activated = map(output_layer_logits,v => this.activation(v, false));
-
-    const output_error = subtract(target, output_layer_activated);
-    const output_delta = multiply(output_error, map(output_layer_logits,v => this.activation(v, true)));
-    const hidden_error = product(output_delta, transpose(this.weights1));
-    const hidden_delta = multiply(hidden_error, map(hidden_layer_logits,v => this.activation(v, true)));
-
-    this.weights1 = add(this.weights1, product(transpose(hidden_layer_activated), scale(output_delta, this.options.learningRate)));
-    this.weights0 = add(this.weights0, product(transpose(input_layer), scale(hidden_delta, this.options.learningRate)));
-
-    // if (i % 10000 == 0) {
-    //   console.log(`Error: ${mean(abs(output_error))}`);
-    // }
-  }
-
-  predict ( input: Vector ): Vector {
-    const input_layer = [input];
-    const hidden_layer = map(product(input_layer, this.weights0),v => this.activation(v, false));
-    const output_layer = map(product(hidden_layer, this.weights1),v => this.activation(v, false));
-    return output_layer[0] || [];
-  }
-
-  // predict(input) {
-  //   // let input_layer = input;
-  //   // let hidden_layer = product(input_layer, this.weights0).map(v => this.activation(v, false));
-  //   // let output_layer = product(hidden_layer, this.weights1).map(v => this.activation(v, false));
-
-  //   const hiddenlayer2: number[] = [];
-  //   for ( let ci = 0, cl = this.weights0._data.length; ci < cl; ci++ ) {
-  //     for ( let i = 0, l = this.weights0._data[ci].length; i < l; i++ ) {
-  //       hiddenlayer2[i] ||= 0;
-  //       hiddenlayer2[i] += this.weights0._data[ci][i] * input._data[0][ci];
-  //     }
-  //   }
-  //   const hiddenlayer3 = hiddenlayer2.map(v => this.activation(v, false));
-
-  //   const outputlayer2: number[] = [];
-  //   for ( let ci = 0, cl = this.weights1._data.length; ci < cl; ci++ ) {
-  //     for ( let i = 0, l = this.weights1._data[ci].length; i < l; i++ ) {
-  //       outputlayer2[i] ||= 0;
-  //       outputlayer2[i] += this.weights1._data[ci][i] * hiddenlayer3[ci];
-  //     }
-  //   }
-  //   const outputlayer3 = outputlayer2.map(v => this.activation(v, false));
-
-  //   return outputlayer3;
-
-  // }
 
 }
 
