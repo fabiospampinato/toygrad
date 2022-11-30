@@ -1,0 +1,413 @@
+
+/* IMPORT */
+
+import {describe} from 'fava';
+import {relu, sigmoid, softplus, tanh} from '../dist/activations.js';
+import {abs, add, create, divide, each, map, mean, multiply, product, random, reduce, scale, subtract, sum, transpose} from '../dist/ops.js';
+import ExampleXOR from '../examples/xor.js';
+
+/* MAIN */
+
+describe ( 'Toygrad', () => {
+
+  describe ( 'activations', () => {
+
+    describe ( 'relu', it => {
+
+      //TODO
+
+    });
+
+    describe ( 'sigmoid', it => {
+
+      //TODO
+
+    });
+
+    describe ( 'softplus', it => {
+
+      //TODO
+
+    });
+
+    describe ( 'tanh', it => {
+
+      //TODO
+
+    });
+
+  });
+
+  describe ( 'ops', () => {
+
+    describe ( 'abs', it => {
+
+      it ( 'does not mutate arguments', t => {
+
+        const input = [[-1]];
+        const output = abs ( input );
+
+        t.not ( input, output );
+        t.deepEqual ( input, [[-1]] );
+
+      });
+
+      it ( 'makes every value positive', t => {
+
+        const input = [
+          [1, 2, 3],
+          [-1, -2, -3],
+          [0, -0.123, -0]
+        ];
+
+        const output = [
+          [1, 2, 3],
+          [1, 2, 3],
+          [0, 0.123, 0]
+        ];
+
+        t.deepEqual ( abs ( input ), output );
+
+      });
+
+    });
+
+    describe ( 'add', it => {
+
+      it ( 'adds a matrix from another', t => {
+
+        const inputA = [
+          [1, 2, 3],
+          [-3, -2, -1]
+        ];
+
+        const inputB = [
+          [1.5, 2.5, 3.5],
+          [-3.5, -2.5, -1.5]
+        ];
+
+        const output = [
+          [2.5, 4.5, 6.5],
+          [-6.5, -4.5, -2.5]
+        ];
+
+        t.deepEqual ( add ( inputA, inputB ), output );
+
+      });
+
+    });
+
+    describe ( 'create', it => {
+
+      it ( 'creates an empty matrix', t => {
+
+        const matrix = create ( 10, 20 );
+
+        t.true ( matrix.length === 10 );
+        t.true ( matrix.every ( row => row.length === 20 ) );
+        t.is ( sum ( matrix ), 0 );
+
+      });
+
+      it ( 'creates a matrix filled with a single value', t => {
+
+        const matrix = create ( 10, 20, 1 );
+
+        t.is ( sum ( matrix ), 200 );
+
+      });
+
+    });
+
+    describe ( 'divide', it => {
+
+      it ( 'divides a matrix from another', t => {
+
+        const inputA = [
+          [100, 200, 300],
+          [-300, -200, -100]
+        ];
+
+        const inputB = [
+          [1, 10, 100],
+          [100, 10, 1]
+        ];
+
+        const output = [
+          [100, 20, 3],
+          [-3, -20, -100]
+        ];
+
+        t.deepEqual ( divide ( inputA, inputB ), output );
+
+      });
+
+    });
+
+    describe ( 'each', it => {
+
+      it ( 'iterates over every value', t => {
+
+        const input = [
+          [1, 2, 3],
+          [-3, -2, -1]
+        ];
+
+        const received = [];
+        const expected = [1, 2, 3, -3, -2, -1];
+        const result = each ( input, x => received.push ( x ) );
+
+        t.is ( result, undefined );
+        t.deepEqual ( received, expected );
+
+      });
+
+    });
+
+    describe ( 'map', it => {
+
+      it ( 'does not mutate arguments', t => {
+
+        const input = [[-1]];
+        const output = map ( input, x => x * 2 );
+
+        t.not ( input, output );
+        t.deepEqual ( input, [[-1]] );
+
+      });
+
+      it ( 'maps over every value', t => {
+
+        const input = [
+          [1, 2, 3],
+          [-3, -2, -1]
+        ];
+
+        const output = [
+          [2, 4, 6],
+          [-6, -4, -2]
+        ];
+
+        t.deepEqual ( map ( input, x => x * 2 ), output );
+
+      });
+
+    });
+
+    describe ( 'mean', it => {
+
+      it ( 'returns the mean of the values', t => {
+
+        const input = [
+          [1, 2, 3],
+          [-3, -2, -1],
+          [1, 1.1, 1.11]
+        ];
+
+        t.deepEqual ( mean ( input ), 3.21 / 9 );
+
+      });
+
+    });
+
+    describe ( 'multiply', it => {
+
+      it ( 'multiplies a matrix from another', t => {
+
+        const inputA = [
+          [1, 2, 3],
+          [-3, -2, -1]
+        ];
+
+        const inputB = [
+          [1, 2, 3],
+          [3, 2, 1]
+        ];
+
+        const output = [
+          [1, 4, 9],
+          [-9, -4, -1]
+        ];
+
+        t.deepEqual ( multiply ( inputA, inputB ), output );
+
+      });
+
+    });
+
+    describe ( 'product', it => {
+
+      it ( 'multiples a matrix from another, rows by columns', t => {
+
+        const inputA = [
+          [1, 2],
+          [4, 3]
+        ];
+
+        const inputB = [
+          [1, 2, 3],
+          [3, -4, 7]
+        ];
+
+        const output = [
+          [7, -6, 17],
+          [13, -4, 33]
+        ];
+
+        t.deepEqual ( product ( inputA, inputB ), output );
+
+      });
+
+    });
+
+    describe ( 'random', it => {
+
+      it ( 'instantiates a random matrix', t => {
+
+        const matrix = random ( 1000, 1000, -1, 1 );
+
+        t.true ( sum ( matrix ) < 2000 );
+        t.true ( sum ( matrix ) > -2000 );
+
+      });
+
+    });
+
+    describe ( 'reduce', it => {
+
+      it ( 'reduces over every value', t => {
+
+        const input = [
+          [1, 2, 3],
+          [-3, -2, -1],
+          [1, 1.1, 1.11]
+        ];
+
+        t.deepEqual ( reduce ( input, ( acc, x ) => acc + x, 0 ), 3.21 );
+
+      });
+
+    });
+
+    describe ( 'scale', it => {
+
+      it ( 'does not mutate arguments', t => {
+
+        const input = [[-1]];
+        const output = scale ( input, 2 );
+
+        t.not ( input, output );
+        t.deepEqual ( input, [[-1]] );
+
+      });
+
+      it ( 'multiplies every value by a factor', t => {
+
+        const input = [
+          [1, 2, 3],
+          [-3, -2, -1]
+        ];
+
+        const output = [
+          [2, 4, 6],
+          [-6, -4, -2]
+        ];
+
+        t.deepEqual ( scale ( input, 2 ), output );
+
+      });
+
+    });
+
+    describe ( 'subtract', it => {
+
+      it ( 'subtracts a matrix from another', t => {
+
+        const inputA = [
+          [1, 2, 3],
+          [-3, -2, -1]
+        ];
+
+        const inputB = [
+          [1.5, 2.5, 3.5],
+          [-3.5, -2.5, -1.5]
+        ];
+
+        const output = [
+          [-.5, -.5, -.5],
+          [.5, .5, .5]
+        ];
+
+        t.deepEqual ( subtract ( inputA, inputB ), output );
+
+      });
+
+    });
+
+    describe ( 'sum', it => {
+
+      it ( 'sums every value', t => {
+
+        const input = [
+          [1, 2, 3],
+          [-3, -2, -1],
+          [1, 1.1, 1.11]
+        ];
+
+        t.deepEqual ( sum ( input ), 3.21 );
+
+      });
+
+    });
+
+    describe ( 'transpose', it => {
+
+      it ( 'does not mutate arguments', t => {
+
+        const input = [[-1]];
+        const output = scale ( input, 2 );
+
+        t.not ( input, output );
+        t.deepEqual ( input, [[-1]] );
+
+      });
+
+      it ( 'transposes a matrix', t => {
+
+        const input = [
+          [1, 2, 3],
+          [-3, -2, -1]
+        ];
+
+        const output = [
+          [1, -3],
+          [2, -2],
+          [3, -1]
+        ];
+
+        t.deepEqual ( transpose ( input ), output );
+
+      });
+
+    });
+
+  });
+
+  describe ( 'example', () => {
+
+    describe ( 'xor', it => {
+
+      it ( 'works', t => {
+
+        t.true ( ExampleXOR.predict ( [0, 0] )[0] < .1 );
+        t.true ( ExampleXOR.predict ( [1, 0] )[0] > .9 );
+        t.true ( ExampleXOR.predict ( [0, 1] )[0] > .9 );
+        t.true ( ExampleXOR.predict ( [1, 1] )[0] < .1 );
+
+      });
+
+    });
+
+  });
+
+});
