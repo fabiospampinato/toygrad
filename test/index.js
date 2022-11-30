@@ -489,6 +489,51 @@ describe ( 'Toygrad', () => {
 
     });
 
+    it ( 'throws if the number of layers is incorrect', t => {
+
+      try {
+
+        new NeuralNetwork ({
+          learningRate: 1,
+          layers: []
+        });
+
+      } catch ( error ) {
+
+        t.is ( error.message, 'Only a fixed 2 layers of weights are supported for now, sorry' );
+
+      }
+
+    });
+
+    it ( 'throws if layers\' inputs and ouputs don\'t match up', t => {
+
+      try {
+
+        new NeuralNetwork ({
+          learningRate: 1,
+          layers: [
+            {
+              inputs: 1,
+              outputs: 5,
+              activation: 'sigmoid'
+            },
+            {
+              inputs: 4,
+              outputs: 1,
+              activation: 'sigmoid'
+            }
+          ]
+        });
+
+      } catch ( error ) {
+
+        t.is ( error.message, 'The number of outputs of a layer must match the number of inputs of the next layer' );
+
+      }
+
+    });
+
   });
 
   describe ( 'examples', () => {

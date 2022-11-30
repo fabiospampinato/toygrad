@@ -25,6 +25,9 @@ class NeuralNetwork {
 
   constructor ( options: Options ) {
 
+    if ( options.layers.length !== 2 ) throw new Error ( 'Only a fixed 2 layers of weights are supported for now, sorry' );
+    if ( !options.layers.slice ( 0, 1 ).every ( ( layer, i ) => layer.outputs === options.layers[i + 1].inputs ) ) throw new Error ( 'The number of outputs of a layer must match the number of inputs of the next layer' );
+
     const layer0 = options.layers[0];
     const layer1 = options.layers[1];
     const activation0 = Activations[layer0.activation];
