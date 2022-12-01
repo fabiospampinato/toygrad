@@ -35,11 +35,19 @@ benchmark.group ( 'xor', () => {
     iterations: 1,
     fn: () => {
       const nn = new NeuralNetwork ( xorOptions );
+      const input1 = [0, 0];
+      const input2 = [0, 1];
+      const input3 = [1, 0];
+      const input4 = [1, 1];
+      const output1 = [0];
+      const output2 = [1];
+      const output3 = [1];
+      const output4 = [0];
       for ( let i = 0; i < 500_000; i++ ) {
-        nn.trainSingle ( [0, 0], [0] );
-        nn.trainSingle ( [0, 1], [1] );
-        nn.trainSingle ( [1, 0], [1] );
-        nn.trainSingle ( [1, 1], [0] );
+        nn.trainSingle ( input1, output1 );
+        nn.trainSingle ( input2, output2 );
+        nn.trainSingle ( input3, output3 );
+        nn.trainSingle ( input4, output4 );
       }
     }
   });
@@ -49,8 +57,10 @@ benchmark.group ( 'xor', () => {
     iterations: 1,
     fn: () => {
       const nn = new NeuralNetwork ( xorOptions );
+      const inputs = [[0, 0], [0, 1], [1, 0], [1, 1]];
+      const outputs = [[0], [1], [1], [0]];
       for ( let i = 0; i < 500_000; i++ ) {
-        nn.trainMultiple ( [[0, 0], [0, 1], [1, 0], [1, 1]], [[0], [1], [1], [0]] );
+        nn.trainMultiple ( inputs, outputs );
       }
     }
   });
