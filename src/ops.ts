@@ -106,6 +106,7 @@ const reduce = <T> ( x: Matrix, iterator: ( acc: T, x: number, row: number, col:
 };
 
 const scale = ( x: Matrix, factor: number ): Matrix => {
+  if ( factor === 1 ) return x;
   return map ( x, x => x * factor );
 };
 
