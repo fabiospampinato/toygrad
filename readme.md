@@ -24,12 +24,12 @@ const nn = new NeuralNetwork ({
     {
       inputs: 2,
       outputs: 4,
-      activation: 'sigmoid'
+      activation: 'tanh'
     },
     {
       inputs: 4,
       outputs: 1,
-      activation: 'sigmoid'
+      activation: 'tanh'
     }
   ]
 });

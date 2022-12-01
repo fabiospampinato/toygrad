@@ -8,17 +8,17 @@ import {NeuralNetwork} from '../dist/index.js';
 /* HELPERS */
 
 const xorOptions = {
-  learningRate: 1,
+  learningRate: .1,
   layers: [
     {
       inputs: 2,
       outputs: 4,
-      activation: 'sigmoid'
+      activation: 'tanh'
     },
     {
       inputs: 4,
       outputs: 1,
-      activation: 'sigmoid'
+      activation: 'tanh'
     }
   ]
 };

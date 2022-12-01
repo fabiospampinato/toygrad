@@ -347,12 +347,12 @@ describe ( 'Toygrad', () => {
           {
             inputs: 2,
             outputs: 4,
-            activation: 'sigmoid'
+            activation: 'tanh'
           },
           {
             inputs: 4,
             outputs: 1,
-            activation: 'sigmoid'
+            activation: 'tanh'
           }
         ],
         learningRate: .1
@@ -385,12 +385,12 @@ describe ( 'Toygrad', () => {
           {
             inputs: 2,
             outputs: 4,
-            activation: 'sigmoid'
+            activation: 'tanh'
           },
           {
             inputs: 4,
             outputs: 1,
-            activation: 'sigmoid'
+            activation: 'tanh'
           }
         ]
       });
@@ -419,7 +419,7 @@ describe ( 'Toygrad', () => {
       try {
 
         new NeuralNetwork ({
-          learningRate: 1,
+          learningRate: .1,
           layers: []
         });
 
@@ -436,17 +436,17 @@ describe ( 'Toygrad', () => {
       try {
 
         new NeuralNetwork ({
-          learningRate: 1,
+          learningRate: .1,
           layers: [
             {
               inputs: 1,
               outputs: 5,
-              activation: 'sigmoid'
+              activation: 'tanh'
             },
             {
               inputs: 4,
               outputs: 1,
-              activation: 'sigmoid'
+              activation: 'tanh'
             }
           ]
         });
