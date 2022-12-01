@@ -70,7 +70,7 @@ fs.writeFileSync ( 'xor.standalone.js', xor.toString () );
 
 ## Thanks
 
-- Huge thanks to [@liashchynskyi](https://github.com/liashchynskyi), who actually wrote some very core code used in this library, and an amazing [article](https://dev.to/liashchynskyi/creating-of-neural-network-using-javascript-in-7minutes-o21) about building your own neural network.
+- Huge thanks to [@liashchynskyi](https://github.com/liashchynskyi), who actually wrote some very core code used in this library, and an amazing [article](https://dev.to/liashchynskyi/creating-of-neural-network-using-javascript-in-7minutes-o21) about building your own neural network from scratch.
 
 ## License
 

@@ -9,6 +9,8 @@ import type {Identity, Matrix, Precision, Vector, Options, ResultForward, Result
 
 /* MAIN */
 
+//TODO: Generalize this to an arbitrary number of layers
+
 class NeuralNetwork {
 
   /* VARIABLES */
