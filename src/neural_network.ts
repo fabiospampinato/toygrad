@@ -2,9 +2,9 @@
 /* IMPORT */
 
 import * as Activations from './activations';
+import {encode, decode} from './encoding';
 import {abs, add, map, mean, mse, multiply, product, random, scale, subtract, transpose} from './ops';
 import {fusedAddProductScale, fusedMultiplyMapActivation} from './ops';
-import {encode, decode} from './weights';
 import Matrix from './matrix';
 import type {Identity, Vector, Options, ResultForward, ResultBackward, ResultTrain} from './types';
 

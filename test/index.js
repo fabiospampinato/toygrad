@@ -3,8 +3,8 @@
 
 import {describe} from 'fava';
 import {relu, sigmoid, softplus, tanh} from '../dist/activations.js';
+import {encode, decode} from '../dist/encoding.js';
 import {abs, add, divide, each, map, mean, multiply, product, random, reduce, scale, subtract, sum, transpose} from '../dist/ops.js';
-import {encode, decode} from '../dist/weights.js';
 import Matrix from '../dist/matrix.js';
 import NeuralNetwork from '../dist/neural_network.js';
 import ExampleXOR from '../examples/xor.js';
@@ -461,25 +461,21 @@ describe ( 'Toygrad', () => {
 
   });
 
-  describe ( 'weights', () => {
+  describe ( 'encoding', it => {
 
-    describe ( 'encoding', it => {
+    it ( 'support encoding and decoding', t => {
 
-      it ( 'support encoding and decoding', t => {
+      const input = Matrix.from ([
+        [1, 2, 3],
+        [-3, -2, -1],
+        [1, 1.5, 1.11]
+      ]);
 
-        const input = Matrix.from ([
-          [1, 2, 3],
-          [-3, -2, -1],
-          [1, 1.5, 1.11]
-        ]);
+      const encoded = encode ( input );
+      const decoded = decode ( encoded );
 
-        const encoded = encode ( input );
-        const decoded = decode ( encoded );
-
-        t.is ( encoded.length, 74 );
-        t.deepEqual ( input.buffer, decoded.buffer );
-
-      });
+      t.is ( encoded.length, 74 );
+      t.deepEqual ( input.buffer, decoded.buffer );
 
     });
 
