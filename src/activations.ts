@@ -29,7 +29,7 @@ const softplus = ( x: number, derivative: boolean ): number => {
 };
 
 const tanh = ( x: number, derivative: boolean ): number => {
-  const fx = 2 / ( 1 + Math.exp ( -2 * x ) ) - 1;
+  const fx = Math.tanh ( x );
   if ( derivative ) {
     return 1 - ( fx ** 2 );
   } else {
