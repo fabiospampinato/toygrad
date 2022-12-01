@@ -1,7 +1,7 @@
 
 /* MAIN */
 
-//TODO: Are these correct? Does it make sense for the derivative of relu, for example, to be either 0 or 1? These don't look like partial derivatives 🤔
+//TODO: Add softmax
 
 const leakyrelu = ( x: number, derivative: boolean ): number => {
   if ( derivative ) {
