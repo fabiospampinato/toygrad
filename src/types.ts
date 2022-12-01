@@ -7,6 +7,8 @@ type Identity<T> = ( x: T ) => T;
 
 type Matrix = number[][];
 
+type Precision = 'float64' | 'float32' | 'float16';
+
 type Vector = number[];
 
 type Layer = {
@@ -18,7 +20,8 @@ type Layer = {
 
 type Options = {
   layers: Layer[],
-  learningRate: number
+  learningRate: number,
+  precision?: Precision
 };
 
 type ResultForward = [
@@ -42,6 +45,6 @@ type ResultTrain = [
 
 /* EXPORT */
 
-export type {Activation, Identity, Matrix, Vector};
+export type {Activation, Identity, Matrix, Precision, Vector};
 export type {Layer, Options};
 export type {ResultForward, ResultBackward, ResultTrain};

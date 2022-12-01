@@ -419,7 +419,6 @@ describe ( 'Toygrad', () => {
     it ( 'can export the model as options and import it again', t => {
 
       const nn1 = new NeuralNetwork ({
-        learningRate: .1,
         layers: [
           {
             inputs: 2,
@@ -431,7 +430,9 @@ describe ( 'Toygrad', () => {
             outputs: 1,
             activation: 'sigmoid'
           }
-        ]
+        ],
+        learningRate: .1,
+        precision: 'float64'
       });
 
       const i00 = nn1.infer ( [0, 0] )[0];
@@ -551,18 +552,36 @@ describe ( 'Toygrad', () => {
 
     describe ( 'encoding', it => {
 
-      it ( 'support encoding and decoding', t => {
+      it.todo ( 'support encoding and decoding, with float16 precision' );
+
+      it ( 'support encoding and decoding, with float32 precision', t => {
 
         const input = [
           [1, 2, 3],
           [-3, -2, -1],
-          // [1, 1.1, 1.11] // This requires using Float64Array
-          [1, 1.5, 1.25] // This works with Float32Array
+          [1, 1.5, 1.25]
         ];
 
-        const encoded = encode ( input );
-        const decoded = decode ( encoded );
+        const encoded = encode ( input, 'float32' );
+        const decoded = decode ( encoded, 'float32' );
 
+        t.is ( encoded.length, 74 );
+        t.deepEqual ( input, decoded );
+
+      });
+
+      it ( 'support encoding and decoding, with float64 precision', t => {
+
+        const input = [
+          [1, 2, 3],
+          [-3, -2, -1],
+          [1, 1.1, 1.11]
+        ];
+
+        const encoded = encode ( input, 'float64' );
+        const decoded = decode ( encoded, 'float64' );
+
+        t.is ( encoded.length, 146 );
         t.deepEqual ( input, decoded );
 
       });

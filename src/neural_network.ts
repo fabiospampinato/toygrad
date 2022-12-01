@@ -5,7 +5,7 @@ import * as Activations from './activations';
 import {abs, add, clone, map, mean, multiply, product, random, scale, subtract, transpose} from './ops';
 import {isString} from './utils';
 import {encode, decode} from './weights';
-import type {Identity, Matrix, Vector, Options, ResultForward, ResultBackward, ResultTrain} from './types';
+import type {Identity, Matrix, Precision, Vector, Options, ResultForward, ResultBackward, ResultTrain} from './types';
 
 /* MAIN */
 
@@ -14,6 +14,7 @@ class NeuralNetwork {
   /* VARIABLES */
 
   options: Options;
+  precision: Precision;
 
   activation0: Identity<number>;
   activation1: Identity<number>;
@@ -38,14 +39,15 @@ class NeuralNetwork {
     const activation1 = Activations[layer1.activation];
 
     this.options = options;
+    this.precision = options.precision || 'float32';
 
     this.activation0 = x => activation0 ( x, false );
     this.activation1 = x => activation1 ( x, false );
     this.activation0d = x => activation0 ( x, true );
     this.activation1d = x => activation1 ( x, true );
 
-    this.weights0 = weights0 ? ( isString ( weights0 ) ? decode ( weights0 ): weights0 ) : random ( layer0.inputs, layer0.outputs, -1, 1 );
-    this.weights1 = weights1 ? ( isString ( weights1 ) ? decode ( weights1 ): weights1 ) : random ( layer1.inputs, layer1.outputs, -1, 1 );
+    this.weights0 = weights0 ? ( isString ( weights0 ) ? decode ( weights0, this.precision ): weights0 ) : random ( layer0.inputs, layer0.outputs, -1, 1 );
+    this.weights1 = weights1 ? ( isString ( weights1 ) ? decode ( weights1, this.precision ): weights1 ) : random ( layer1.inputs, layer1.outputs, -1, 1 );
 
   }
 
@@ -136,8 +138,8 @@ class NeuralNetwork {
           `_.d = ${decode.toString ()};` +
           `_.a0 = ${Activations[this.options.layers[0].activation].toString ()};` +
           `_.a1 = ${Activations[this.options.layers[1].activation].toString ()};` +
-          `_.w0 = _.d ( '${encode ( this.weights0 )}' );` +
-          `_.w1 = _.d ( '${encode ( this.weights1 )}' );` +
+          `_.w0 = _.d ( '${encode ( this.weights0, this.precision )}' );` +
+          `_.w1 = _.d ( '${encode ( this.weights1, this.precision )}' );` +
         `}` +
         `return _.m ( _.p ( _.m ( _.p ( [input], _.w0 ), _.a0 ), _.w1 ), _.a1 )[0];` +
       `})`
@@ -150,7 +152,6 @@ class NeuralNetwork {
   exportAsOptions (): Options {
 
     return {
-      learningRate: this.options.learningRate,
       layers: [
         {
           inputs: this.options.layers[0].inputs,
@@ -164,7 +165,9 @@ class NeuralNetwork {
           activation: this.options.layers[1].activation,
           weights: clone ( this.weights1 )
         }
-      ]
+      ],
+      learningRate: this.options.learningRate,
+      precision: this.options.precision
     };
 
   }
