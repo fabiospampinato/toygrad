@@ -3,6 +3,8 @@
 
 import * as Activations from './activations';
 import {abs, add, clone, map, mean, multiply, product, random, scale, subtract, transpose} from './ops';
+import {isString} from './utils';
+import {encode, decode} from './weights';
 import type {Identity, Matrix, Vector, Options, ResultForward, ResultBackward, ResultTrain} from './types';
 
 /* MAIN */
@@ -30,6 +32,8 @@ class NeuralNetwork {
 
     const layer0 = options.layers[0];
     const layer1 = options.layers[1];
+    const weights0 = layer0.weights;
+    const weights1 = layer1.weights;
     const activation0 = Activations[layer0.activation];
     const activation1 = Activations[layer1.activation];
 
@@ -40,8 +44,8 @@ class NeuralNetwork {
     this.activation0d = x => activation0 ( x, true );
     this.activation1d = x => activation1 ( x, true );
 
-    this.weights0 = layer0.weights || random ( layer0.inputs, layer0.outputs, -1, 1 );
-    this.weights1 = layer1.weights || random ( layer1.inputs, layer1.outputs, -1, 1 );
+    this.weights0 = weights0 ? ( isString ( weights0 ) ? decode ( weights0 ): weights0 ) : random ( layer0.inputs, layer0.outputs, -1, 1 );
+    this.weights1 = weights1 ? ( isString ( weights1 ) ? decode ( weights1 ): weights1 ) : random ( layer1.inputs, layer1.outputs, -1, 1 );
 
   }
 
@@ -63,7 +67,7 @@ class NeuralNetwork {
 
     const [weighted0, weighted1, activated0, activated1] = forward;
 
-    const error1 = subtract ( outputs, activated1 ); //TODO: debug this
+    const error1 = subtract ( outputs, activated1 );
     const gradient1 = multiply ( error1, map ( weighted1, this.activation0d ) );
     const error0 = product ( gradient1, transpose ( this.weights1 ) );
     const gradient0 = multiply ( error0, map ( weighted0, this.activation1d ) );
@@ -129,10 +133,11 @@ class NeuralNetwork {
           `_._ = true;` +
           `_.p = ${product.toString ()};` +
           `_.m = ${map.toString ()};` +
+          `_.d = ${decode.toString ()};` +
           `_.a0 = ${Activations[this.options.layers[0].activation].toString ()};` +
           `_.a1 = ${Activations[this.options.layers[1].activation].toString ()};` +
-          `_.w0 = JSON.parse ( '${JSON.stringify ( this.weights0 )}' );` +
-          `_.w1 = JSON.parse ( '${JSON.stringify ( this.weights1 )}' );` +
+          `_.w0 = _.d ( '${encode ( this.weights0 )}' );` +
+          `_.w1 = _.d ( '${encode ( this.weights1 )}' );` +
         `}` +
         `return _.m ( _.p ( _.m ( _.p ( [input], _.w0 ), _.a0 ), _.w1 ), _.a1 )[0];` +
       `})`

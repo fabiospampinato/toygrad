@@ -4,6 +4,7 @@
 import {describe} from 'fava';
 import {relu, sigmoid, softplus, tanh} from '../dist/activations.js';
 import {abs, add, clone, create, divide, each, each2, map, mean, multiply, product, random, reduce, scale, subtract, sum, transpose} from '../dist/ops.js';
+import {encode, decode} from '../dist/weights.js';
 import NeuralNetwork from '../dist/neural_network.js';
 import ExampleXOR from '../examples/xor.js';
 
@@ -460,12 +461,22 @@ describe ( 'Toygrad', () => {
           {
             inputs: 2,
             outputs: 4,
-            activation: 'sigmoid'
+            activation: 'sigmoid',
+            weights: [
+              [0, .5, 1, 1.5],
+              [-0, -.5, -1, -1.5]
+            ]
           },
           {
             inputs: 4,
             outputs: 1,
-            activation: 'sigmoid'
+            activation: 'sigmoid',
+            weights: [
+              [0],
+              [.5],
+              [1],
+              [1.5]
+            ]
           }
         ]
       });
@@ -531,6 +542,30 @@ describe ( 'Toygrad', () => {
         t.is ( error.message, 'The number of outputs of a layer must match the number of inputs of the next layer' );
 
       }
+
+    });
+
+  });
+
+  describe ( 'weights', () => {
+
+    describe ( 'encoding', it => {
+
+      it ( 'support encoding and decoding', t => {
+
+        const input = [
+          [1, 2, 3],
+          [-3, -2, -1],
+          // [1, 1.1, 1.11] // This requires using Float64Array
+          [1, 1.5, 1.25] // This works with Float32Array
+        ];
+
+        const encoded = encode ( input );
+        const decoded = decode ( encoded );
+
+        t.deepEqual ( input, decoded );
+
+      });
 
     });
 

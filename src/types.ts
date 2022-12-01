@@ -13,7 +13,7 @@ type Layer = {
   inputs: number,
   outputs: number,
   activation: Activation,
-  weights?: Matrix
+  weights?: Matrix | string
 };
 
 type Options = {
