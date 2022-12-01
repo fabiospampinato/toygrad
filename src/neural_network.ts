@@ -3,6 +3,7 @@
 
 import * as Activations from './activations';
 import {abs, add, map, mean, multiply, product, random, scale, subtract, transpose} from './ops';
+import {fusedAddProductScale, fusedMultiplyMapActivation} from './ops';
 import {encode, decode} from './weights';
 import Matrix from './matrix';
 import type {Identity, Vector, Options, ResultForward, ResultBackward, ResultTrain} from './types';
@@ -70,13 +71,17 @@ class NeuralNetwork {
     const [weighted0, weighted1, activated0, activated1] = forward;
 
     const error1 = subtract ( Matrix.from ( outputs ), activated1 );
-    const gradient1 = multiply ( error1, map ( weighted1, this.activation0d ) );
+    // const gradient1 = multiply ( error1, map ( weighted1, this.activation1d ) );
+    const gradient1 = fusedMultiplyMapActivation ( error1, weighted1, this.activation1d );
     const error0 = product ( gradient1, transpose ( this.weights1 ) );
-    const gradient0 = multiply ( error0, map ( weighted0, this.activation1d ) );
+    // const gradient0 = multiply ( error0, map ( weighted0, this.activation0d ) );
+    const gradient0 = fusedMultiplyMapActivation ( error0, weighted0, this.activation0d );
     const result: ResultBackward = [error0, error1, gradient0, gradient1];
 
-    this.weights1 = add ( this.weights1, product ( transpose ( activated0 ), scale ( gradient1, this.options.learningRate ) ) );
-    this.weights0 = add ( this.weights0, product ( transpose ( Matrix.from ( inputs ) ), scale ( gradient0, this.options.learningRate ) ) );
+    // this.weights1 = add ( this.weights1, product ( transpose ( activated0 ), scale ( gradient1, this.options.learningRate ) ) );
+    this.weights1 = fusedAddProductScale ( this.weights1, transpose ( activated0 ), gradient1, this.options.learningRate );
+    // this.weights0 = add ( this.weights0, product ( transpose ( Matrix.from ( inputs ) ), scale ( gradient0, this.options.learningRate ) ) );
+    this.weights0 = fusedAddProductScale ( this.weights0, transpose ( Matrix.from ( inputs ) ), gradient0, this.options.learningRate );
 
     return result;
 

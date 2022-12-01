@@ -2,6 +2,7 @@
 /* IMPORT */
 
 import Matrix from './matrix';
+import type {Identity} from './types';
 
 /* MAIN */
 
@@ -115,6 +116,33 @@ const transpose = ( x: Matrix ): Matrix => {
   return matrix;
 };
 
+/* FUSED */
+
+const fusedAddProductScale = ( x: Matrix, y: Matrix, z: Matrix, factor: number ): Matrix => {
+  const matrix = new Matrix ( y.rows, z.cols );
+  for ( let i = 0, l = y.rows; i < l; i++ ) {
+    for ( let j = 0, m = z.cols; j < m; j++ ) {
+      let sum = x.get ( i, j );
+      for ( let k = 0, n = y.cols; k < n; k++ ) {
+        sum += y.get ( i, k ) * z.get ( k, j ) * factor;
+      }
+      matrix.set ( i, j, sum );
+    }
+  }
+  return matrix;
+};
+
+const fusedMultiplyMapActivation = ( x: Matrix, y: Matrix, activation: Identity<number> ): Matrix => {
+  const matrix = new Matrix ( x.rows, x.cols );
+  for ( let i = 0, l = x.rows; i < l; i++ ) {
+    for ( let j = 0, m = x.cols; j < m; j++ ) {
+      matrix.set ( i, j, x.get ( i, j ) * activation ( y.get ( i, j ) ) );
+    }
+  }
+  return matrix;
+};
+
 /* EXPORT */
 
 export {abs, add, divide, each, each2, map, map2, mean, multiply, product, random, reduce, scale, subtract, sum, transpose};
+export {fusedAddProductScale, fusedMultiplyMapActivation};
