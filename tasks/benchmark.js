@@ -2,12 +2,13 @@
 /* IMPORT */
 
 import benchmark from 'benchloop';
+import Matrix from '../dist/matrix.js';
 import {NeuralNetwork} from '../dist/index.js';
 
 /* HELPERS */
 
 const xorOptions = {
-  learningRate: .1,
+  learningRate: 1,
   layers: [
     {
       inputs: 2,
@@ -57,8 +58,8 @@ benchmark.group ( 'xor', () => {
     iterations: 1,
     fn: () => {
       const nn = new NeuralNetwork ( xorOptions );
-      const inputs = [[0, 0], [0, 1], [1, 0], [1, 1]];
-      const outputs = [[0], [1], [1], [0]];
+      const inputs = Matrix.from ( [[0, 0], [0, 1], [1, 0], [1, 1]] );
+      const outputs = Matrix.from ( [[0], [1], [1], [0]] );
       for ( let i = 0; i < 500_000; i++ ) {
         nn.trainMultiple ( inputs, outputs );
       }

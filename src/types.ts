@@ -1,13 +1,13 @@
 
+/* IMPORT */
+
+import type Matrix from './matrix';
+
 /* MAIN */
 
 type Activation = 'relu' | 'sigmoid' | 'softplus' | 'tanh';
 
 type Identity<T> = ( x: T ) => T;
-
-type Matrix = number[][];
-
-type Precision = 'float64' | 'float32' | 'float16';
 
 type Vector = number[];
 
@@ -15,13 +15,12 @@ type Layer = {
   inputs: number,
   outputs: number,
   activation: Activation,
-  weights?: Matrix | string
+  weights?: string
 };
 
 type Options = {
   layers: Layer[],
-  learningRate: number,
-  precision?: Precision
+  learningRate: number
 };
 
 type ResultForward = [
@@ -41,10 +40,10 @@ type ResultBackward = [
 type ResultTrain = [
   forward: ResultForward,
   backward: ResultBackward
-]
+];
 
 /* EXPORT */
 
-export type {Activation, Identity, Matrix, Precision, Vector};
+export type {Activation, Identity, Vector};
 export type {Layer, Options};
 export type {ResultForward, ResultBackward, ResultTrain};

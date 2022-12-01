@@ -1,7 +1,7 @@
 
 /* IMPORT */
 
-import type {Matrix} from './types';
+import Matrix from './matrix';
 
 /* MAIN */
 
@@ -15,63 +15,49 @@ const add = ( x: Matrix, y: Matrix ): Matrix => {
   return map2 ( x, y, ( x, y ) => x + y );
 };
 
-const clone = ( x: Matrix ): Matrix => {
-  return map ( x, x => x );
-};
-
-const create = ( rows: number, cols: number, value: number = 0 ): Matrix => {
-  const matrix: Matrix = new Array ( rows );
-  for ( let i = 0; i < rows; i++ ) {
-    matrix[i] = new Array ( cols ).fill ( value );
-  }
-  return matrix;
-};
-
 const divide = ( x: Matrix, y: Matrix ): Matrix => {
   return map2 ( x, y, ( x, y ) => x / y );
 };
 
 const each = ( x: Matrix, iterator: ( x: number, row: number, col: number ) => void ): void => {
-  for ( let i = 0, l = x.length; i < l; i++ ) {
-    for ( let j = 0, m = x[i].length; j < m; j++ ) {
-      iterator ( x[i][j], i, j );
+  for ( let i = 0, l = x.rows; i < l; i++ ) {
+    for ( let j = 0, m = x.cols; j < m; j++ ) {
+      iterator ( x.get ( i, j ), i, j );
     }
   }
 };
 
 const each2 = ( x: Matrix, y: Matrix, iterator: ( x: number, y: number, row: number, col: number ) => number ): void => {
-  for ( let i = 0, l = x.length; i < l; i++ ) {
-    for ( let j = 0, m = x[i].length; j < m; j++ ) {
-      iterator ( x[i][j], y[i][j], i, j );
+  for ( let i = 0, l = x.rows; i < l; i++ ) {
+    for ( let j = 0, m = x.cols; j < m; j++ ) {
+      iterator ( x.get ( i, j ), y.get ( i, j ), i, j );
     }
   }
 };
 
 const map = ( x: Matrix, iterator: ( x: number, row: number, col: number ) => number ): Matrix => {
-  const matrix: Matrix = new Array ( x.length );
-  for ( let i = 0, l = x.length; i < l; i++ ) {
-    matrix[i] = new Array ( x[i].length );
-    for ( let j = 0, m = x[i].length; j < m; j++ ) {
-      matrix[i][j] = iterator ( x[i][j], i, j );
+  const matrix = new Matrix ( x.rows, x.cols );
+  for ( let i = 0, l = x.rows; i < l; i++ ) {
+    for ( let j = 0, m = x.cols; j < m; j++ ) {
+      matrix.set ( i, j, iterator ( x.get ( i, j ), i, j ) );
     }
   }
   return matrix;
 };
 
 const map2 = ( x: Matrix, y: Matrix, iterator: ( x: number, y: number, row: number, col: number ) => number ): Matrix => {
-  const matrix: Matrix = new Array ( x.length );
-  for ( let i = 0, l = x.length; i < l; i++ ) {
-    matrix[i] = new Array ( x[i].length );
-    for ( let j = 0, m = x[i].length; j < m; j++ ) {
-      matrix[i][j] = iterator ( x[i][j], y[i][j], i, j );
+  const matrix = new Matrix ( x.rows, x.cols );
+  for ( let i = 0, l = x.rows; i < l; i++ ) {
+    for ( let j = 0, m = x.cols; j < m; j++ ) {
+      matrix.set ( i, j, iterator ( x.get ( i, j ), y.get ( i, j ), i, j ) );
     }
   }
   return matrix;
 };
 
 const mean = ( x: Matrix ): number => {
-  if ( !x.length ) return 0;
-  return sum ( x ) / ( x.length * x[0].length );
+  if ( !x.rows || !x.cols ) return 0;
+  return sum ( x ) / ( x.rows * x.cols );
 };
 
 const multiply = ( x: Matrix, y: Matrix ): Matrix => {
@@ -79,23 +65,23 @@ const multiply = ( x: Matrix, y: Matrix ): Matrix => {
 };
 
 const product = ( x: Matrix, y: Matrix ): Matrix => {
-  const matrix: Matrix = new Array ( x.length );
-  for ( let i = 0, l = x.length; i < l; i++ ) {
-    matrix[i] = new Array ( y[0].length );
-    for ( let j = 0, m = y[0].length; j < m; j++) {
+  const matrix = new Matrix ( x.rows, y.cols );
+  for ( let i = 0, l = x.rows; i < l; i++ ) {
+    for ( let j = 0, m = y.cols; j < m; j++ ) {
       let sum = 0;
-      for ( let k = 0, n = x[0].length; k < n; k++ ) {
-        sum += x[i][k] * y[k][j];
+      for ( let k = 0, n = x.cols; k < n; k++ ) {
+        sum += x.get ( i, k ) * y.get ( k, j );
       }
-      matrix[i][j] = sum;
+      matrix.set ( i, j, sum );
     }
   }
   return matrix;
 };
 
 const random = ( rows: number, cols: number, min: number, max: number ): Matrix => {
+  const matrix = new Matrix ( rows, cols );
   const rand = () => ( Math.random () * ( max - min ) ) + min;
-  return map ( create ( rows, cols ), rand );
+  return map ( matrix, rand );
 };
 
 const reduce = <T> ( x: Matrix, iterator: ( acc: T, x: number, row: number, col: number ) => T, acc: T ): T => {
@@ -119,12 +105,11 @@ const sum = ( x: Matrix ): number => {
 };
 
 const transpose = ( x: Matrix ): Matrix => {
-  if ( !x.length ) return [];
-  const matrix: Matrix = new Array ( x[0].length );
-  for ( let i = 0, l = x[0].length; i < l; i++ ) {
-    matrix[i] = new Array ( x.length );
-    for ( let j = 0, m = x.length; j < m; j++ ) {
-      matrix[i][j] = x[j][i];
+  if ( !x.rows || !x.cols ) return x;
+  const matrix = new Matrix ( x.cols, x.rows );
+  for ( let i = 0, l = x.cols; i < l; i++ ) {
+    for ( let j = 0, m = x.rows; j < m; j++ ) {
+      matrix.set ( i, j, x.get ( j, i ) );
     }
   }
   return matrix;
@@ -132,4 +117,4 @@ const transpose = ( x: Matrix ): Matrix => {
 
 /* EXPORT */
 
-export {abs, add, clone, create, divide, each, each2, map, map2, mean, multiply, product, random, reduce, scale, subtract, sum, transpose};
+export {abs, add, divide, each, each2, map, map2, mean, multiply, product, random, reduce, scale, subtract, sum, transpose};

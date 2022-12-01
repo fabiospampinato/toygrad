@@ -3,10 +3,15 @@
 
 import {describe} from 'fava';
 import {relu, sigmoid, softplus, tanh} from '../dist/activations.js';
-import {abs, add, clone, create, divide, each, each2, map, mean, multiply, product, random, reduce, scale, subtract, sum, transpose} from '../dist/ops.js';
+import {abs, add, divide, each, map, mean, multiply, product, random, reduce, scale, subtract, sum, transpose} from '../dist/ops.js';
 import {encode, decode} from '../dist/weights.js';
+import Matrix from '../dist/matrix.js';
 import NeuralNetwork from '../dist/neural_network.js';
 import ExampleXOR from '../examples/xor.js';
+
+/* HELPERS */
+
+const distance = ( x, y ) => Math.abs ( x - y );
 
 /* MAIN */
 
@@ -44,31 +49,21 @@ describe ( 'Toygrad', () => {
 
     describe ( 'abs', it => {
 
-      it ( 'does not mutate arguments', t => {
-
-        const input = [[-1]];
-        const output = abs ( input );
-
-        t.not ( input, output );
-        t.deepEqual ( input, [[-1]] );
-
-      });
-
       it ( 'makes every value positive', t => {
 
-        const input = [
+        const input = Matrix.from ([
           [1, 2, 3],
           [-1, -2, -3],
           [0, -0.123, -0]
-        ];
+        ]);
 
-        const output = [
+        const output = Matrix.from ([
           [1, 2, 3],
           [1, 2, 3],
           [0, 0.123, 0]
-        ];
+        ]);
 
-        t.deepEqual ( abs ( input ), output );
+        t.deepEqual ( abs ( input ).buffer, output.buffer );
 
       });
 
@@ -78,63 +73,22 @@ describe ( 'Toygrad', () => {
 
       it ( 'adds a matrix from another', t => {
 
-        const inputA = [
+        const inputA = Matrix.from ([
           [1, 2, 3],
           [-3, -2, -1]
-        ];
+        ]);
 
-        const inputB = [
+        const inputB = Matrix.from ([
           [1.5, 2.5, 3.5],
           [-3.5, -2.5, -1.5]
-        ];
+        ]);
 
-        const output = [
+        const output = Matrix.from ([
           [2.5, 4.5, 6.5],
           [-6.5, -4.5, -2.5]
-        ];
+        ]);
 
-        t.deepEqual ( add ( inputA, inputB ), output );
-
-      });
-
-    });
-
-    describe ( 'clone', it => {
-
-      it ( 'clones a matrix', t => {
-
-        const matrix = random ( 10, 20, -1, 1 );
-        const cmatrix = clone ( matrix );
-
-        t.true ( cmatrix.length === 10 );
-        t.true ( cmatrix.every ( row => row.length === 20 ) );
-        t.not ( matrix, cmatrix );
-
-        each2 ( matrix, cmatrix, ( a, b ) => {
-          t.is ( a, b );
-        });
-
-      });
-
-    });
-
-    describe ( 'create', it => {
-
-      it ( 'creates an empty matrix', t => {
-
-        const matrix = create ( 10, 20 );
-
-        t.true ( matrix.length === 10 );
-        t.true ( matrix.every ( row => row.length === 20 ) );
-        t.is ( sum ( matrix ), 0 );
-
-      });
-
-      it ( 'creates a matrix filled with a single value', t => {
-
-        const matrix = create ( 10, 20, 1 );
-
-        t.is ( sum ( matrix ), 200 );
+        t.deepEqual ( add ( inputA, inputB ).buffer, output.buffer );
 
       });
 
@@ -144,22 +98,22 @@ describe ( 'Toygrad', () => {
 
       it ( 'divides a matrix from another', t => {
 
-        const inputA = [
+        const inputA = Matrix.from ([
           [100, 200, 300],
           [-300, -200, -100]
-        ];
+        ]);
 
-        const inputB = [
+        const inputB = Matrix.from ([
           [1, 10, 100],
           [100, 10, 1]
-        ];
+        ]);
 
-        const output = [
+        const output = Matrix.from ([
           [100, 20, 3],
           [-3, -20, -100]
-        ];
+        ]);
 
-        t.deepEqual ( divide ( inputA, inputB ), output );
+        t.deepEqual ( divide ( inputA, inputB ).buffer, output.buffer );
 
       });
 
@@ -169,10 +123,10 @@ describe ( 'Toygrad', () => {
 
       it ( 'iterates over every value', t => {
 
-        const input = [
+        const input = Matrix.from ([
           [1, 2, 3],
           [-3, -2, -1]
-        ];
+        ]);
 
         const received = [];
         const expected = [1, 2, 3, -3, -2, -1];
@@ -187,29 +141,19 @@ describe ( 'Toygrad', () => {
 
     describe ( 'map', it => {
 
-      it ( 'does not mutate arguments', t => {
-
-        const input = [[-1]];
-        const output = map ( input, x => x * 2 );
-
-        t.not ( input, output );
-        t.deepEqual ( input, [[-1]] );
-
-      });
-
       it ( 'maps over every value', t => {
 
-        const input = [
+        const input = Matrix.from ([
           [1, 2, 3],
           [-3, -2, -1]
-        ];
+        ]);
 
-        const output = [
+        const output = Matrix.from ([
           [2, 4, 6],
           [-6, -4, -2]
-        ];
+        ]);
 
-        t.deepEqual ( map ( input, x => x * 2 ), output );
+        t.deepEqual ( map ( input, x => x * 2 ).buffer, output.buffer );
 
       });
 
@@ -219,13 +163,13 @@ describe ( 'Toygrad', () => {
 
       it ( 'returns the mean of the values', t => {
 
-        const input = [
+        const input = Matrix.from ([
           [1, 2, 3],
           [-3, -2, -1],
           [1, 1.1, 1.11]
-        ];
+        ]);
 
-        t.deepEqual ( mean ( input ), 3.21 / 9 );
+        t.true ( distance ( mean ( input ), 3.21 / 9 ) < 0.000001 );
 
       });
 
@@ -235,22 +179,22 @@ describe ( 'Toygrad', () => {
 
       it ( 'multiplies a matrix from another', t => {
 
-        const inputA = [
+        const inputA = Matrix.from ([
           [1, 2, 3],
           [-3, -2, -1]
-        ];
+        ]);
 
-        const inputB = [
+        const inputB = Matrix.from ([
           [1, 2, 3],
           [3, 2, 1]
-        ];
+        ]);
 
-        const output = [
+        const output = Matrix.from ([
           [1, 4, 9],
           [-9, -4, -1]
-        ];
+        ]);
 
-        t.deepEqual ( multiply ( inputA, inputB ), output );
+        t.deepEqual ( multiply ( inputA, inputB ).buffer, output.buffer );
 
       });
 
@@ -260,22 +204,22 @@ describe ( 'Toygrad', () => {
 
       it ( 'multiples a matrix from another, rows by columns', t => {
 
-        const inputA = [
+        const inputA = Matrix.from ([
           [1, 2],
           [4, 3]
-        ];
+        ]);
 
-        const inputB = [
+        const inputB = Matrix.from ([
           [1, 2, 3],
           [3, -4, 7]
-        ];
+        ]);
 
-        const output = [
+        const output = Matrix.from ([
           [7, -6, 17],
           [13, -4, 33]
-        ];
+        ]);
 
-        t.deepEqual ( product ( inputA, inputB ), output );
+        t.deepEqual ( product ( inputA, inputB ).buffer, output.buffer );
 
       });
 
@@ -298,13 +242,13 @@ describe ( 'Toygrad', () => {
 
       it ( 'reduces over every value', t => {
 
-        const input = [
+        const input = Matrix.from ([
           [1, 2, 3],
           [-3, -2, -1],
           [1, 1.1, 1.11]
-        ];
+        ]);
 
-        t.deepEqual ( reduce ( input, ( acc, x ) => acc + x, 0 ), 3.21 );
+        t.true ( distance ( reduce ( input, ( acc, x ) => acc + x, 0 ), 3.21 ) < 0.000001 );
 
       });
 
@@ -312,29 +256,19 @@ describe ( 'Toygrad', () => {
 
     describe ( 'scale', it => {
 
-      it ( 'does not mutate arguments', t => {
-
-        const input = [[-1]];
-        const output = scale ( input, 2 );
-
-        t.not ( input, output );
-        t.deepEqual ( input, [[-1]] );
-
-      });
-
       it ( 'multiplies every value by a factor', t => {
 
-        const input = [
+        const input = Matrix.from ([
           [1, 2, 3],
           [-3, -2, -1]
-        ];
+        ]);
 
-        const output = [
+        const output = Matrix.from ([
           [2, 4, 6],
           [-6, -4, -2]
-        ];
+        ]);
 
-        t.deepEqual ( scale ( input, 2 ), output );
+        t.deepEqual ( scale ( input, 2 ).buffer, output.buffer );
 
       });
 
@@ -344,22 +278,22 @@ describe ( 'Toygrad', () => {
 
       it ( 'subtracts a matrix from another', t => {
 
-        const inputA = [
+        const inputA = Matrix.from ([
           [1, 2, 3],
           [-3, -2, -1]
-        ];
+        ]);
 
-        const inputB = [
+        const inputB = Matrix.from ([
           [1.5, 2.5, 3.5],
           [-3.5, -2.5, -1.5]
-        ];
+        ]);
 
-        const output = [
+        const output = Matrix.from ([
           [-.5, -.5, -.5],
           [.5, .5, .5]
-        ];
+        ]);
 
-        t.deepEqual ( subtract ( inputA, inputB ), output );
+        t.deepEqual ( subtract ( inputA, inputB ).buffer, output.buffer );
 
       });
 
@@ -369,13 +303,13 @@ describe ( 'Toygrad', () => {
 
       it ( 'sums every value', t => {
 
-        const input = [
+        const input = Matrix.from ([
           [1, 2, 3],
           [-3, -2, -1],
           [1, 1.1, 1.11]
-        ];
+        ]);
 
-        t.deepEqual ( sum ( input ), 3.21 );
+        t.true ( distance ( sum ( input ), 3.21 ) < 0.000001 );
 
       });
 
@@ -383,30 +317,20 @@ describe ( 'Toygrad', () => {
 
     describe ( 'transpose', it => {
 
-      it ( 'does not mutate arguments', t => {
-
-        const input = [[-1]];
-        const output = scale ( input, 2 );
-
-        t.not ( input, output );
-        t.deepEqual ( input, [[-1]] );
-
-      });
-
       it ( 'transposes a matrix', t => {
 
-        const input = [
+        const input = Matrix.from ([
           [1, 2, 3],
           [-3, -2, -1]
-        ];
+        ]);
 
-        const output = [
+        const output = Matrix.from ([
           [1, -3],
           [2, -2],
           [3, -1]
-        ];
+        ]);
 
-        t.deepEqual ( transpose ( input ), output );
+        t.deepEqual ( transpose ( input ).buffer, output.buffer );
 
       });
 
@@ -431,8 +355,7 @@ describe ( 'Toygrad', () => {
             activation: 'sigmoid'
           }
         ],
-        learningRate: .1,
-        precision: 'float64'
+        learningRate: .1
       });
 
       const i00 = nn1.infer ( [0, 0] )[0];
@@ -462,22 +385,12 @@ describe ( 'Toygrad', () => {
           {
             inputs: 2,
             outputs: 4,
-            activation: 'sigmoid',
-            weights: [
-              [0, .5, 1, 1.5],
-              [-0, -.5, -1, -1.5]
-            ]
+            activation: 'sigmoid'
           },
           {
             inputs: 4,
             outputs: 1,
-            activation: 'sigmoid',
-            weights: [
-              [0],
-              [.5],
-              [1],
-              [1.5]
-            ]
+            activation: 'sigmoid'
           }
         ]
       });
@@ -552,37 +465,19 @@ describe ( 'Toygrad', () => {
 
     describe ( 'encoding', it => {
 
-      it.todo ( 'support encoding and decoding, with float16 precision' );
+      it ( 'support encoding and decoding', t => {
 
-      it ( 'support encoding and decoding, with float32 precision', t => {
-
-        const input = [
+        const input = Matrix.from ([
           [1, 2, 3],
           [-3, -2, -1],
-          [1, 1.5, 1.25]
-        ];
+          [1, 1.5, 1.11]
+        ]);
 
-        const encoded = encode ( input, 'float32' );
-        const decoded = decode ( encoded, 'float32' );
+        const encoded = encode ( input );
+        const decoded = decode ( encoded );
 
         t.is ( encoded.length, 74 );
-        t.deepEqual ( input, decoded );
-
-      });
-
-      it ( 'support encoding and decoding, with float64 precision', t => {
-
-        const input = [
-          [1, 2, 3],
-          [-3, -2, -1],
-          [1, 1.1, 1.11]
-        ];
-
-        const encoded = encode ( input, 'float64' );
-        const decoded = decode ( encoded, 'float64' );
-
-        t.is ( encoded.length, 146 );
-        t.deepEqual ( input, decoded );
+        t.deepEqual ( input.buffer, decoded.buffer );
 
       });
 

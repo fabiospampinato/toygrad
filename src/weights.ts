@@ -1,51 +1,46 @@
 
 /* IMPORT */
 
-import type {Matrix, Precision} from './types';
+import Matrix from './matrix';
 
 /* MAIN */
 
 //TODO: Make the encoding more efficient, we are throwing away some usable bits by encoding to hex characters
-//TODO: Actually implement "float16" encoding
 
-const encode = ( matrix: Matrix, precision: Precision ): string => {
+const encode = ( matrix: Matrix ): string => {
 
-  const TypedArray = ( precision === 'float64' ) ? Float64Array : Float32Array;
+  const uint8 = new Uint8Array ( matrix.buffer.buffer );
+  const bytesPerRow = matrix.cols * matrix.buffer.BYTES_PER_ELEMENT;
 
-  return matrix.map ( row => {
+  let encoded = '';
 
-    const {buffer} = new TypedArray ( row );
-    const uint8 = new Uint8Array ( buffer );
-    const hex = Array.from ( uint8 ).map ( byte => byte.toString ( 16 ).padStart ( 2, '0' ) ).join ( '' );
+  for ( let ri = 0, rl = uint8.length; ri < rl; ri += bytesPerRow ) {
+    for ( let i = ri, l = ri + bytesPerRow; i < l; i += 1 ) {
+      encoded += uint8[i].toString ( 16 ).padStart ( 2, '0' );
+    }
+    encoded += '|';
+  }
 
-    return hex;
-
-  }).join ( '|' );
+  return encoded.slice ( 0, -1 );
 
 };
 
-const decode = ( encoded: string, precision: Precision ): Matrix => {
+const decode = ( encoded: string ): Matrix => {
 
-  const TypedArray = ( precision === 'float64' ) ? Float64Array : Float32Array;
+  const parts = encoded.split ( '|' );
+  const rows = parts.length;
+  const cols = parts[0].length / 8;
+  const matrix = new Matrix ( rows, cols );
+  const uint8 = new Uint8Array ( matrix.buffer.buffer );
 
-  return encoded.split ( '|' ).map ( row => {
-
-    const length = row.length / 2;
-    const bytesPerElement = TypedArray.BYTES_PER_ELEMENT;
-    const byteLength = length + ( ( length % bytesPerElement ) ? bytesPerElement - ( length % bytesPerElement ) : 0 );
-    const buffer = new ArrayBuffer ( byteLength );
-    const uint8 = new Uint8Array ( buffer );
-    const float32 = new TypedArray ( buffer );
-
-    for ( let i = 0, l = row.length; i < l; i += 2 ) {
-
-      uint8[i / 2] = parseInt ( row.slice ( i, i + 2 ), 16 );
-
+  for ( let ri = 0, rl = parts.length; ri < rl; ri++ ) {
+    for ( let i = 0, l = parts[ri].length; i < l; i += 2 ) {
+      const index = ri * ( cols * 4 ) + ( i / 2 );
+      uint8[index] = parseInt ( parts[ri].slice ( i, i + 2 ), 16 );
     }
+  }
 
-    return Array.from ( float32 ).slice ( 0, length );
-
-  });
+  return matrix;
 
 };
 
