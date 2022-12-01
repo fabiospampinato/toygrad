@@ -24,7 +24,7 @@ const nn = new NeuralNetwork ({
     {
       inputs: 2,
       outputs: 4,
-      activation: 'tanh'
+      activation: 'relu'
     },
     {
       inputs: 4,

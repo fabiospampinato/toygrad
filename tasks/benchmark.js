@@ -13,7 +13,7 @@ const xorOptions = {
     {
       inputs: 2,
       outputs: 4,
-      activation: 'tanh'
+      activation: 'relu'
     },
     {
       inputs: 4,
