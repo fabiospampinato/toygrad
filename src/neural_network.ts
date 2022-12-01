@@ -145,7 +145,7 @@ class NeuralNetwork {
       `})`
     ];
 
-    return eval ( fn.join ( '' ) );
+    return eval.call ( null, fn.join ( '' ) );
 
   }
 
