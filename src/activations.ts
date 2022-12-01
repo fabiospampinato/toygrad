@@ -3,6 +3,14 @@
 
 //TODO: Are these correct? Does it make sense for the derivative of relu, for example, to be either 0 or 1? These don't look like partial derivatives 🤔
 
+const leakyrelu = ( x: number, derivative: boolean ): number => {
+  if ( derivative ) {
+    return ( x < 0 ) ? .01 : 1;
+  } else {
+    return Math.max ( .1 * x );
+  }
+};
+
 const relu = ( x: number, derivative: boolean ): number => {
   if ( derivative ) {
     return ( x < 0 ) ? 0 : 1;
@@ -39,4 +47,4 @@ const tanh = ( x: number, derivative: boolean ): number => {
 
 /* EXPORT */
 
-export {relu, sigmoid, softplus, tanh};
+export {leakyrelu, relu, sigmoid, softplus, tanh};

@@ -5,7 +5,7 @@ import type Matrix from './matrix';
 
 /* MAIN */
 
-type Activation = 'relu' | 'sigmoid' | 'softplus' | 'tanh';
+type Activation = 'leakyrelu' | 'relu' | 'sigmoid' | 'softplus' | 'tanh';
 
 type Identity<T> = ( x: T ) => T;
 
