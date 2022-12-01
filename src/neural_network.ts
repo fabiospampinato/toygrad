@@ -2,7 +2,7 @@
 /* IMPORT */
 
 import * as Activations from './activations';
-import {abs, add, map, mean, multiply, product, random, scale, subtract, transpose} from './ops';
+import {abs, add, map, mean, mse, multiply, product, random, scale, subtract, transpose} from './ops';
 import {fusedAddProductScale, fusedMultiplyMapActivation} from './ops';
 import {encode, decode} from './weights';
 import Matrix from './matrix';
@@ -98,7 +98,7 @@ class NeuralNetwork {
     const forward = this.forward ( inputs );
     const backward = this.backward ( inputs, outputs, forward );
 
-    return [forward, backward];
+    return [inputs, outputs, forward, backward];
 
   }
 
@@ -114,7 +114,7 @@ class NeuralNetwork {
       if ( logEnabled && result && ( i % logStep ) === 0 ) {
 
         const percentage = ( ++s / 10 ).toFixed ( 1 );
-        const error = mean ( abs ( result[1][1] ) );
+        const error = mse ( result[2][3], Matrix.from ( result[1] ) );
 
         console.log ( `${percentage}% -`, error );
 

@@ -28,7 +28,7 @@ const each = ( x: Matrix, iterator: ( x: number, row: number, col: number ) => v
   }
 };
 
-const each2 = ( x: Matrix, y: Matrix, iterator: ( x: number, y: number, row: number, col: number ) => number ): void => {
+const each2 = ( x: Matrix, y: Matrix, iterator: ( x: number, y: number, row: number, col: number ) => void ): void => {
   for ( let i = 0, l = x.rows; i < l; i++ ) {
     for ( let j = 0, m = x.cols; j < m; j++ ) {
       iterator ( x.get ( i, j ), y.get ( i, j ), i, j );
@@ -61,6 +61,10 @@ const mean = ( x: Matrix ): number => {
   return sum ( x ) / ( x.rows * x.cols );
 };
 
+const mse = ( x: Matrix, y: Matrix ): number => {
+  return reduce2 ( x, y, ( acc, x, y ) => acc + ( ( x - y ) ** 2 ), 0 ) / ( x.rows * x.cols );
+};
+
 const multiply = ( x: Matrix, y: Matrix ): Matrix => {
   return map2 ( x, y, ( x, y ) => x * y );
 };
@@ -88,6 +92,13 @@ const random = ( rows: number, cols: number, min: number, max: number ): Matrix 
 const reduce = <T> ( x: Matrix, iterator: ( acc: T, x: number, row: number, col: number ) => T, acc: T ): T => {
   each ( x, ( x, row, col ) => {
     acc = iterator ( acc, x, row, col );
+  });
+  return acc;
+};
+
+const reduce2 = <T> ( x: Matrix, y: Matrix, iterator: ( acc: T, x: number, y: number, row: number, col: number ) => T, acc: T ): T => {
+  each2 ( x, y, ( x, y, row, col ) => {
+    acc = iterator ( acc, x, y, row, col );
   });
   return acc;
 };
@@ -144,5 +155,5 @@ const fusedMultiplyMapActivation = ( x: Matrix, y: Matrix, activation: Identity<
 
 /* EXPORT */
 
-export {abs, add, divide, each, each2, map, map2, mean, multiply, product, random, reduce, scale, subtract, sum, transpose};
+export {abs, add, divide, each, each2, map, map2, mean, mse, multiply, product, random, reduce, reduce2, scale, subtract, sum, transpose};
 export {fusedAddProductScale, fusedMultiplyMapActivation};

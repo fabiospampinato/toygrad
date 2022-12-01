@@ -38,6 +38,8 @@ type ResultBackward = [
 ];
 
 type ResultTrain = [
+  inputs: Vector[],
+  outputs: Vector[],
   forward: ResultForward,
   backward: ResultBackward
 ];
