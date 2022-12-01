@@ -10,18 +10,18 @@ const nn = new NeuralNetwork ({
   layers: [
     {
       inputs: 2,
-      outputs: 4,
+      outputs: 400,
       activation: 'tanh'
     },
     {
-      inputs: 4,
+      inputs: 400,
       outputs: 1,
       activation: 'tanh'
     }
   ]
 });
 
-nn.trainLoop ( 50_000, () => {
+nn.trainLoop ( 800, () => {
   return nn.trainMultiple ( [[0, 0], [0, 1], [1, 0], [1, 1]], [[0], [1], [1], [0]] );
 });
 
