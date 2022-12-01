@@ -7,7 +7,7 @@ const leakyrelu = ( x: number, derivative: boolean ): number => {
   if ( derivative ) {
     return ( x < 0 ) ? .01 : 1;
   } else {
-    return Math.max ( .1 * x );
+    return Math.max ( .1 * x, x );
   }
 };
 
