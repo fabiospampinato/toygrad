@@ -156,6 +156,62 @@ class NeuralNetwork {
 
   }
 
+  exportAsGraphviz (): string {
+
+    const layer0 = this.options.layers[0];
+    const layer1 = this.options.layers[1];
+
+    const lines: string[] = [];
+
+    lines.push ( 'digraph {' );
+    lines.push ( 'rankdir=LR' );
+    lines.push ( 'splines=line' );
+
+    lines.push ( 'subgraph cluster_0 {' );
+    lines.push ( 'label="Input"' );
+    for ( let i = 0; i < layer0.inputs; i++ ) {
+      lines.push ( `"i${i}" [label="" shape="circle"]` );
+      // lines.push ( `"bi${i}" [shape="point" headport="w" tailport="e"]` );
+      // lines.push ( `"bi${i}" -> "i${i}" [style="dashed"]` );
+    }
+    lines.push ( '}' );
+
+    lines.push ( 'subgraph cluster_1 {' );
+    lines.push ( 'label="Hidden"' );
+    for ( let h = 0; h < layer0.outputs; h++ ) {
+      lines.push ( `"h${h}" [label="" shape="circle"]` );
+      // lines.push ( `"bh${h}" [shape="point"]` );
+      // lines.push ( `"bh${h}" -> "h${h}" [style="dashed"]` );
+    }
+    lines.push ( '}' );
+
+    lines.push ( 'subgraph cluster_2 {' );
+    lines.push ( 'label="Output"' );
+    for ( let o = 0; o < layer1.outputs; o++ ) {
+      lines.push ( `"o${o}" [label="" shape="circle"]` );
+      // lines.push ( `"bo${o}" [shape="point"]` );
+      // lines.push ( `"bo${o}" -> "o${o}" [style="dashed"]` );
+    }
+    lines.push ( '}' );
+
+    for ( let i = 0; i < layer0.inputs; i++ ) {
+      for ( let h = 0; h < layer0.outputs; h++ ) {
+        lines.push ( `"i${i}" -> "h${h}"` );
+      }
+    }
+
+    for ( let h = 0; h < layer0.outputs; h++ ) {
+      for ( let o = 0; o < layer1.outputs; o++ ) {
+        lines.push ( `"h${h}" -> "o${o}"` );
+      }
+    }
+
+    lines.push ( '}' );
+
+    return lines.join ( '\n' );
+
+  }
+
   exportAsOptions (): Options {
 
     return {
