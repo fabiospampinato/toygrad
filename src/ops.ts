@@ -79,9 +79,9 @@ const multiply = ( x: Matrix, y: Matrix ): Matrix => {
 };
 
 const product = ( x: Matrix, y: Matrix ): Matrix => {
-  const matrix: Matrix = [];
+  const matrix: Matrix = new Array ( x.length );
   for ( let i = 0, l = x.length; i < l; i++ ) {
-    matrix[i] = [];
+    matrix[i] = new Array ( y[0].length );
     for ( let j = 0, m = y[0].length; j < m; j++) {
       let sum = 0;
       for ( let k = 0, n = x[0].length; k < n; k++ ) {
