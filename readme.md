@@ -39,7 +39,7 @@ const nn = new NeuralNetwork ({
 nn.trainLoop ( 50_000, () => {
   const inputs = [[0, 0], [0, 1], [1, 0], [1, 1]];
   const outputs = [[0], [1], [1], [0]];
-  return nn.trainMultiple ( inputs, outputs );
+  nn.trainMultiple ( inputs, outputs );
 });
 
 // Inferring

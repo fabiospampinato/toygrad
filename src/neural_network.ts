@@ -30,6 +30,8 @@ class NeuralNetwork {
   weights0: Matrix;
   weights1: Matrix;
 
+  trainResultLast?: ResultTrain;
+
   /* CONSTRUCTOR */
 
   constructor ( options: Options ) {
@@ -113,24 +115,27 @@ class NeuralNetwork {
 
     const forward = this.forward ( inputs );
     const backward = this.backward ( inputs, outputs, forward );
+    const result = this.trainResultLast = [inputs, outputs, forward, backward];
 
-    return [inputs, outputs, forward, backward];
+    return result;
 
   }
 
-  trainLoop ( iterations: number, train: ( i: number ) => ResultTrain | void ): void {
+  trainLoop ( iterations: number, train: ( i: number ) => void ): void {
 
     const logEnabled = true;
-    const logStep = Math.floor ( iterations / 1000 );
+    const logInterval = Math.min ( 1000, iterations );
+    const logStep = Math.floor ( iterations / logInterval );
+    const logSteps = ( iterations / logStep );
 
     for ( let i = 0, s = 0; i < iterations; i++ ) {
 
-      const result = train ( i );
+      train ( i );
 
-      if ( logEnabled && result && ( i % logStep ) === 0 ) {
+      if ( logEnabled && this.trainResultLast && ( i % logStep ) === 0 ) {
 
-        const percentage = ( ++s / 10 ).toFixed ( 1 );
-        const error = mse ( result[2][3], from ( result[1] ) );
+        const percentage = ( ( ++s * 100 ) / logSteps ).toFixed ( 1 );
+        const error = mse ( this.trainResultLast[2][3], from ( this.trainResultLast[1] ) );
 
         console.log ( `${percentage}% -`, error );
 

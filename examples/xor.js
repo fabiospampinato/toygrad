@@ -22,7 +22,7 @@ const nn = new NeuralNetwork ({
 });
 
 nn.trainLoop ( 50_000, () => {
-  return nn.trainMultiple ( [[0, 0], [0, 1], [1, 0], [1, 1]], [[0], [1], [1], [0]] );
+  nn.trainMultiple ( [[0, 0], [0, 1], [1, 0], [1, 1]], [[0], [1], [1], [0]] );
 });
 
 // for ( let i = 1; i < 50_000; i++ ) {
