@@ -10,7 +10,7 @@ import Matrix from './matrix';
 const encode = ( matrix: Matrix ): string => {
 
   const uint8 = new Uint8Array ( matrix.buffer.buffer );
-  const bytesPerRow = matrix.cols * matrix.buffer.BYTES_PER_ELEMENT;
+  const bytesPerRow = matrix.cols * 4;
 
   let encoded = '';
 

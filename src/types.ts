@@ -15,6 +15,7 @@ type Layer = {
   inputs: number,
   outputs: number,
   activation: Activation,
+  biases?: string,
   weights?: string
 };
 

@@ -1,8 +1,6 @@
 
 /* MAIN */
 
-//TODO: Add softmax
-
 const leakyrelu = ( x: number, derivative: boolean ): number => {
   if ( derivative ) {
     return ( x < 0 ) ? .01 : 1;

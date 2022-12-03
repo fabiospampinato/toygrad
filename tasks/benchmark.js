@@ -2,7 +2,7 @@
 /* IMPORT */
 
 import benchmark from 'benchloop';
-import Matrix from '../dist/matrix.js';
+import {from} from '../dist/ops.js';
 import {NeuralNetwork} from '../dist/index.js';
 
 /* HELPERS */
@@ -58,8 +58,8 @@ benchmark.group ( 'xor', () => {
     iterations: 1,
     fn: () => {
       const nn = new NeuralNetwork ( xorOptions );
-      const inputs = Matrix.from ( [[0, 0], [0, 1], [1, 0], [1, 1]] );
-      const outputs = Matrix.from ( [[0], [1], [1], [0]] );
+      const inputs = from ( [[0, 0], [0, 1], [1, 0], [1, 1]] );
+      const outputs = from ( [[0], [1], [1], [0]] );
       for ( let i = 0; i < 500_000; i++ ) {
         nn.trainMultiple ( inputs, outputs );
       }

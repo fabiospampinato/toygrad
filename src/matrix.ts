@@ -37,26 +37,6 @@ class Matrix {
 
   }
 
-  /* STATIC API */
-
-  static from ( source: Matrix | number[][] ): Matrix {
-
-    if ( !Array.isArray ( source ) ) return source; // Fast-path, pre-allocated Matrix
-
-    const rows = source.length;
-    const cols = source[0].length;
-    const matrix = new Matrix ( rows, cols );
-
-    for ( let i = 0; i < rows; i++ ) {
-      for ( let j = 0; j < cols; j++ ) {
-        matrix.set ( i, j, source[i][j] );
-      }
-    }
-
-    return matrix;
-
-  }
-
 }
 
 /* EXPORT */

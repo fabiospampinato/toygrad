@@ -3,8 +3,8 @@
 
 import {describe} from 'fava';
 import {relu, sigmoid, softplus, tanh} from '../dist/activations.js';
-import {encode, decode} from '../dist/encoding.js';
-import {abs, add, divide, each, map, mean, multiply, product, random, reduce, scale, subtract, sum, transpose} from '../dist/ops.js';
+import {encode, decode} from '../dist/encoder.js';
+import {abs, add, ceil, column, count, cube, diagonal, divide, each, each2, fill, floor, from, identity, log2, log10, map, map2, mean, mae, max, min, modulo, mse, multiply, ones, pow, product, random, reduce, reduce2, resize, round, row, scale, sign, size, sqrt, square, subtract, sum, trace, transpose, zeros} from '../dist/ops.js';
 import Matrix from '../dist/matrix.js';
 import NeuralNetwork from '../dist/neural_network.js';
 import ExampleXOR from '../examples/xor.js';
@@ -19,29 +19,11 @@ describe ( 'Toygrad', () => {
 
   describe ( 'activations', () => {
 
-    describe ( 'relu', it => {
-
-      //TODO
-
-    });
-
-    describe ( 'sigmoid', it => {
-
-      //TODO
-
-    });
-
-    describe ( 'softplus', it => {
-
-      //TODO
-
-    });
-
-    describe ( 'tanh', it => {
-
-      //TODO
-
-    });
+    //TODO: leakyrelu
+    //TODO: relu
+    //TODO: sigmoid
+    //TODO: softplus
+    //TODO: tanh
 
   });
 
@@ -51,17 +33,13 @@ describe ( 'Toygrad', () => {
 
       it ( 'makes every value positive', t => {
 
-        const input = Matrix.from ([
+        const input = from ([
           [1, 2, 3],
           [-1, -2, -3],
           [0, -0.123, -0]
         ]);
 
-        const output = Matrix.from ([
-          [1, 2, 3],
-          [1, 2, 3],
-          [0, 0.123, 0]
-        ]);
+        const output = map ( input, Math.abs );
 
         t.deepEqual ( abs ( input ).buffer, output.buffer );
 
@@ -71,19 +49,19 @@ describe ( 'Toygrad', () => {
 
     describe ( 'add', it => {
 
-      it ( 'adds a matrix from another', t => {
+      it ( 'adds a matrix to another', t => {
 
-        const inputA = Matrix.from ([
+        const inputA = from ([
           [1, 2, 3],
           [-3, -2, -1]
         ]);
 
-        const inputB = Matrix.from ([
+        const inputB = from ([
           [1.5, 2.5, 3.5],
           [-3.5, -2.5, -1.5]
         ]);
 
-        const output = Matrix.from ([
+        const output = from ([
           [2.5, 4.5, 6.5],
           [-6.5, -4.5, -2.5]
         ]);
@@ -94,21 +72,123 @@ describe ( 'Toygrad', () => {
 
     });
 
+    describe ( 'ceil', it => {
+
+      it ( 'rounds up every value', t => {
+
+        const input = from ([
+          [1, 2, 3],
+          [-1, -2, -3],
+          [0, -0.123, -0]
+        ]);
+
+        const output = map ( input, Math.ceil );
+
+        t.deepEqual ( ceil ( input ).buffer, output.buffer );
+
+      });
+
+    });
+
+    describe ( 'column', it => {
+
+      it ( 'gets a single column from a matrix', t => {
+
+        const input = from ([
+          [1, 2, 3],
+          [-3, -2, -1]
+        ]);
+
+        const col0 = from ([
+          [1],
+          [-3]
+        ]);
+
+        const col1 = from ([
+          [2],
+          [-2]
+        ]);
+
+        const col2 = from ([
+          [3],
+          [-1]
+        ]);
+
+        t.deepEqual ( column ( input, 0 ).buffer, col0.buffer );
+        t.deepEqual ( column ( input, 1 ).buffer, col1.buffer );
+        t.deepEqual ( column ( input, 2 ).buffer, col2.buffer );
+
+      });
+
+    });
+
+    describe ( 'count', it => {
+
+      it ( 'returns the number of values in the matrix', t => {
+
+        const input = from ([
+          [1, 2, 3],
+          [-3, -2, -1]
+        ]);
+
+        t.deepEqual ( count ( input ), 6 );
+
+      });
+
+    });
+
+    describe ( 'cube', it => {
+
+      it ( 'raises every value to the 3rd power', t => {
+
+        const input = from ([
+          [1, 2, 3],
+          [-3, -2, -1]
+        ]);
+
+        const output = map ( input, x => Math.pow ( x, 3 ) );
+
+        t.deepEqual ( cube ( input ).buffer, output.buffer );
+
+      });
+
+    });
+
+    describe ( 'diagonal', it => {
+
+      it ( 'returns values in the diagonal of a square matrix', t => {
+
+        const input = from ([
+          [1, 2, 3],
+          [-3, -2, -1]
+        ]);
+
+        const output = from ([
+          [1, 0],
+          [0, -2]
+        ]);
+
+        t.deepEqual ( diagonal ( input ).buffer, output.buffer );
+
+      });
+
+    });
+
     describe ( 'divide', it => {
 
-      it ( 'divides a matrix from another', t => {
+      it ( 'divides a matrix by another', t => {
 
-        const inputA = Matrix.from ([
+        const inputA = from ([
           [100, 200, 300],
           [-300, -200, -100]
         ]);
 
-        const inputB = Matrix.from ([
+        const inputB = from ([
           [1, 10, 100],
           [100, 10, 1]
         ]);
 
-        const output = Matrix.from ([
+        const output = from ([
           [100, 20, 3],
           [-3, -20, -100]
         ]);
@@ -123,7 +203,7 @@ describe ( 'Toygrad', () => {
 
       it ( 'iterates over every value', t => {
 
-        const input = Matrix.from ([
+        const input = from ([
           [1, 2, 3],
           [-3, -2, -1]
         ]);
@@ -139,16 +219,122 @@ describe ( 'Toygrad', () => {
 
     });
 
+    //TODO: each2
+
+    describe ( 'fill', it => {
+
+      it ( 'replaces every value with a fixed one', t => {
+
+        const input = from ([
+          [1, 2, 3],
+          [-1, -2, -3],
+          [0, -0.123, -0]
+        ]);
+
+        const output = map ( input, () => -1 );
+
+        t.deepEqual ( fill ( input, -1 ).buffer, output.buffer );
+
+      });
+
+    });
+
+    describe ( 'floor', it => {
+
+      it ( 'rounds down every value', t => {
+
+        const input = from ([
+          [1, 2, 3],
+          [-1, -2, -3],
+          [0, -0.123, -0]
+        ]);
+
+        const output = map ( input, Math.floor );
+
+        t.deepEqual ( floor ( input ).buffer, output.buffer );
+
+      });
+
+    });
+
+    describe ( 'from', it => {
+
+      it ( 'creates a matrix from plain arrays', t => {
+
+        const input = from ([
+          [1, 2, 3],
+          [-1, -2, -3],
+          [0, -0.123, -0]
+        ]);
+
+        const output = map ( input, Math.floor );
+
+        t.deepEqual ( floor ( input ).buffer, output.buffer );
+
+      });
+
+    });
+
+    describe ( 'identity', it => {
+
+      it ( 'creates an identity matrix', t => {
+
+        const output = from ([
+          [1, 0, 0],
+          [0, 1, 0],
+          [0, 0, 1]
+        ])
+
+        t.deepEqual ( identity ( 3, 3 ).buffer, output.buffer );
+
+      });
+
+    });
+
+    describe ( 'log2', it => {
+
+      it ( 'calculates the log2 of every value', t => {
+
+        const input = from ([
+          [1, 2, 3],
+          [4, 5, 6]
+        ]);
+
+        const output = map ( input, Math.log2 );
+
+        t.deepEqual ( log2 ( input ).buffer, output.buffer );
+
+      });
+
+    });
+
+    describe ( 'log10', it => {
+
+      it ( 'calculates the log10 of every value', t => {
+
+        const input = from ([
+          [1, 2, 3],
+          [4, 5, 6]
+        ]);
+
+        const output = map ( input, Math.log10 );
+
+        t.deepEqual ( log10 ( input ).buffer, output.buffer );
+
+      });
+
+    });
+
     describe ( 'map', it => {
 
       it ( 'maps over every value', t => {
 
-        const input = Matrix.from ([
+        const input = from ([
           [1, 2, 3],
           [-3, -2, -1]
         ]);
 
-        const output = Matrix.from ([
+        const output = from ([
           [2, 4, 6],
           [-6, -4, -2]
         ]);
@@ -159,17 +345,107 @@ describe ( 'Toygrad', () => {
 
     });
 
+    //TODO: map2
+
     describe ( 'mean', it => {
 
-      it ( 'returns the mean of the values', t => {
+      it ( 'calculats the mean of a matrix', t => {
 
-        const input = Matrix.from ([
+        const input = from ([
           [1, 2, 3],
-          [-3, -2, -1],
-          [1, 1.1, 1.11]
+          [-1, -2, -3],
+          [0, 9, 0]
         ]);
 
-        t.true ( distance ( mean ( input ), 3.21 / 9 ) < 0.000001 );
+        t.deepEqual ( mean ( input ), 1 );
+
+      });
+
+    });
+
+    describe ( 'mae', it => {
+
+      it ( 'calculats the mean absolute error between two matrices', t => {
+
+        const input = from ([
+          [1, 2],
+          [-1, -2]
+        ]);
+
+        const output = from ([
+          [1, 4],
+          [-3, -2]
+        ]);
+
+        t.deepEqual ( mae ( input, output ), 1 );
+
+      });
+
+    });
+
+    describe ( 'max', it => {
+
+      it ( 'gets the maximum value of a matrix', t => {
+
+        const input = from ([
+          [1, 2],
+          [-1, -2]
+        ]);
+
+        t.deepEqual ( max ( input ), 2 );
+
+      });
+
+    });
+
+    describe ( 'min', it => {
+
+      it ( 'gets the minimum value of a matrix', t => {
+
+        const input = from ([
+          [1, 2],
+          [-1, -2]
+        ]);
+
+        t.deepEqual ( min ( input ), -2 );
+
+      });
+
+    });
+
+    describe ( 'modulo', it => {
+
+      it ( 'calculates the modulo for every value', t => {
+
+        const input = from ([
+          [1, 2, 3],
+          [-1, -2, -3],
+          [0, -0.123, -0]
+        ]);
+
+        const output = map ( input, x => x % 2 );
+
+        t.deepEqual ( modulo ( input, 2 ).buffer, output.buffer );
+
+      });
+
+    });
+
+    describe ( 'mse', it => {
+
+      it ( 'calculats the mean square error between two matrices', t => {
+
+        const input = from ([
+          [1, 2],
+          [-1, -2]
+        ]);
+
+        const output = from ([
+          [1, 4],
+          [-3, -2]
+        ]);
+
+        t.deepEqual ( mse ( input, output ), 2 );
 
       });
 
@@ -179,17 +455,17 @@ describe ( 'Toygrad', () => {
 
       it ( 'multiplies a matrix from another', t => {
 
-        const inputA = Matrix.from ([
+        const inputA = from ([
           [1, 2, 3],
           [-3, -2, -1]
         ]);
 
-        const inputB = Matrix.from ([
+        const inputB = from ([
           [1, 2, 3],
           [3, 2, 1]
         ]);
 
-        const output = Matrix.from ([
+        const output = from ([
           [1, 4, 9],
           [-9, -4, -1]
         ]);
@@ -200,21 +476,50 @@ describe ( 'Toygrad', () => {
 
     });
 
+    describe ( 'ones', it => {
+
+      it ( 'returns a matrix filled with ones', t => {
+
+        const output = fill ( new Matrix ( 5, 10 ), 1 );
+
+        t.deepEqual ( ones ( 5, 10 ), output );
+
+      });
+
+    });
+
+    describe ( 'pow', it => {
+
+      it ( 'raises every value to a power', t => {
+
+        const input = from ([
+          [1, 2, 3],
+          [-3, -2, -1]
+        ]);
+
+        const output = map ( input, x => Math.pow ( x, 7 ) );
+
+        t.deepEqual ( pow ( input, 7 ).buffer, output.buffer );
+
+      });
+
+    });
+
     describe ( 'product', it => {
 
       it ( 'multiples a matrix from another, rows by columns', t => {
 
-        const inputA = Matrix.from ([
+        const inputA = from ([
           [1, 2],
           [4, 3]
         ]);
 
-        const inputB = Matrix.from ([
+        const inputB = from ([
           [1, 2, 3],
           [3, -4, 7]
         ]);
 
-        const output = Matrix.from ([
+        const output = from ([
           [7, -6, 17],
           [13, -4, 33]
         ]);
@@ -242,7 +547,7 @@ describe ( 'Toygrad', () => {
 
       it ( 'reduces over every value', t => {
 
-        const input = Matrix.from ([
+        const input = from ([
           [1, 2, 3],
           [-3, -2, -1],
           [1, 1.1, 1.11]
@@ -254,16 +559,89 @@ describe ( 'Toygrad', () => {
 
     });
 
-    describe ( 'scale', it => {
+    //TODO: reduce2
 
-      it ( 'multiplies every value by a factor', t => {
+    describe ( 'resize', it => {
 
-        const input = Matrix.from ([
+      it ( 'resizes a matrix', t => {
+
+        const input = from ([
+          [1, 2, 3],
+          [-1, -2, -3],
+          [0, -0.123, -0]
+        ]);
+
+        const smaller = from ([
+          [1, 2],
+          [-1, -2]
+        ]);
+
+        const bigger = from ([
+          [1, 2, 3, 0],
+          [-1, -2, -3, 0],
+          [0, -0.123, -0, 0],
+          [0, 0, 0, 0]
+        ]);
+
+        t.deepEqual ( resize ( input, 2, 2 ).buffer, smaller.buffer );
+        t.deepEqual ( resize ( input, 4, 4 ).buffer, bigger.buffer );
+
+      });
+
+    });
+
+    describe ( 'round', it => {
+
+      it ( 'rounds every value', t => {
+
+        const input = from ([
+          [1, 2, 3],
+          [-1, -2, -3],
+          [0, -0.123, -0]
+        ]);
+
+        const output = map ( input, Math.round );
+
+        t.deepEqual ( round ( input ).buffer, output.buffer );
+
+      });
+
+    });
+
+    describe ( 'row', it => {
+
+      it ( 'gets a single column from a matrix', t => {
+
+        const input = from ([
           [1, 2, 3],
           [-3, -2, -1]
         ]);
 
-        const output = Matrix.from ([
+        const row0 = from ([
+          [1, 2, 3]
+        ]);
+
+        const row1 = from ([
+          [-3, -2, -1]
+        ]);
+
+        t.deepEqual ( row ( input, 0 ).buffer, row0.buffer );
+        t.deepEqual ( row ( input, 1 ).buffer, row1.buffer );
+
+      });
+
+    });
+
+    describe ( 'scale', it => {
+
+      it ( 'multiplies every value by a factor', t => {
+
+        const input = from ([
+          [1, 2, 3],
+          [-3, -2, -1]
+        ]);
+
+        const output = from ([
           [2, 4, 6],
           [-6, -4, -2]
         ]);
@@ -274,21 +652,90 @@ describe ( 'Toygrad', () => {
 
     });
 
-    describe ( 'subtract', it => {
+    describe ( 'sign', it => {
 
-      it ( 'subtracts a matrix from another', t => {
+      it ( 'gets a single column from a matrix', t => {
 
-        const inputA = Matrix.from ([
+        const input = from ([
           [1, 2, 3],
           [-3, -2, -1]
         ]);
 
-        const inputB = Matrix.from ([
+        const output = from ([
+          [1, 1, 1],
+          [-1, -1, -1]
+        ]);
+
+        t.deepEqual ( sign ( input ).buffer, output.buffer );
+
+      });
+
+    });
+
+    describe ( 'size', it => {
+
+      it ( 'returns the dimensions of the matrix', t => {
+
+        const input = from ([
+          [1, 2, 3],
+          [-3, -2, -1]
+        ]);
+
+        t.deepEqual ( size ( input ), [2, 3] );
+
+      });
+
+    });
+
+    describe ( 'sqrt', it => {
+
+      it ( 'calculates the square root of every value', t => {
+
+        const input = from ([
+          [1, 2, 3],
+          [4, 5, 6]
+        ]);
+
+        const output = map ( input, Math.sqrt );
+
+        t.deepEqual ( sqrt ( input ).buffer, output.buffer );
+
+      });
+
+    });
+
+    describe ( 'square', it => {
+
+      it ( 'raises every value to the 2nd power', t => {
+
+        const input = from ([
+          [1, 2, 3],
+          [-3, -2, -1]
+        ]);
+
+        const output = map ( input, x => Math.pow ( x, 2 ) );
+
+        t.deepEqual ( square ( input ).buffer, output.buffer );
+
+      });
+
+    });
+
+    describe ( 'subtract', it => {
+
+      it ( 'subtracts a matrix from another', t => {
+
+        const inputA = from ([
+          [1, 2, 3],
+          [-3, -2, -1]
+        ]);
+
+        const inputB = from ([
           [1.5, 2.5, 3.5],
           [-3.5, -2.5, -1.5]
         ]);
 
-        const output = Matrix.from ([
+        const output = from ([
           [-.5, -.5, -.5],
           [.5, .5, .5]
         ]);
@@ -303,7 +750,7 @@ describe ( 'Toygrad', () => {
 
       it ( 'sums every value', t => {
 
-        const input = Matrix.from ([
+        const input = from ([
           [1, 2, 3],
           [-3, -2, -1],
           [1, 1.1, 1.11]
@@ -315,22 +762,49 @@ describe ( 'Toygrad', () => {
 
     });
 
-    describe ( 'transpose', it => {
+    describe ( 'trace', it => {
 
-      it ( 'transposes a matrix', t => {
+      it ( 'returns the sum of values in the diagonal of a square matrix', t => {
 
-        const input = Matrix.from ([
+        const input = from ([
           [1, 2, 3],
           [-3, -2, -1]
         ]);
 
-        const output = Matrix.from ([
+        t.deepEqual ( trace ( input ), -1 );
+
+      });
+
+    });
+
+    describe ( 'transpose', it => {
+
+      it ( 'transposes a matrix', t => {
+
+        const input = from ([
+          [1, 2, 3],
+          [-3, -2, -1]
+        ]);
+
+        const output = from ([
           [1, -3],
           [2, -2],
           [3, -1]
         ]);
 
         t.deepEqual ( transpose ( input ).buffer, output.buffer );
+
+      });
+
+    });
+
+    describe ( 'zeros', it => {
+
+      it ( 'returns a matrix filled with zeros', t => {
+
+        const output = new Matrix ( 5, 10 );
+
+        t.deepEqual ( zeros ( 5, 10 ), output );
 
       });
 
@@ -357,6 +831,13 @@ describe ( 'Toygrad', () => {
         ],
         learningRate: .1
       });
+
+      for ( let i = 1; i < 1000; i++ ) {
+        nn1.trainSingle ( [0, 0], [0] );
+        nn1.trainSingle ( [0, 1], [1] );
+        nn1.trainSingle ( [1, 0], [1] );
+        nn1.trainSingle ( [1, 1], [0] );
+      }
 
       const i00 = nn1.infer ( [0, 0] )[0];
       const i10 = nn1.infer ( [1, 0] )[0];
@@ -395,6 +876,13 @@ describe ( 'Toygrad', () => {
         ]
       });
 
+      for ( let i = 1; i < 1000; i++ ) {
+        nn1.trainSingle ( [0, 0], [0] );
+        nn1.trainSingle ( [0, 1], [1] );
+        nn1.trainSingle ( [1, 0], [1] );
+        nn1.trainSingle ( [1, 1], [0] );
+      }
+
       const i00 = nn1.infer ( [0, 0] )[0];
       const i10 = nn1.infer ( [1, 0] )[0];
       const i01 = nn1.infer ( [0, 1] )[0];
@@ -431,7 +919,7 @@ describe ( 'Toygrad', () => {
 
     });
 
-    it ( 'throws if layers\' inputs and ouputs don\'t match up', t => {
+    it ( 'throws if layers\' inputs and ouputs do not match up', t => {
 
       try {
 
@@ -461,11 +949,11 @@ describe ( 'Toygrad', () => {
 
   });
 
-  describe ( 'encoding', it => {
+  describe ( 'encoder', it => {
 
-    it ( 'support encoding and decoding', t => {
+    it ( 'support encoder and decoding', t => {
 
-      const input = Matrix.from ([
+      const input = from ([
         [1, 2, 3],
         [-3, -2, -1],
         [1, 1.5, 1.11]
