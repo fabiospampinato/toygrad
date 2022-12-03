@@ -6,12 +6,12 @@ import {encode, decode} from './encoder';
 import {abs, activate, add, fill, from, map, map2, mean, mae, mse, multiply, product, random, scale, subtract, transpose} from './ops';
 import {fusedAddProductScale, fusedAddScale, fusedProductBiased} from './ops';
 import Matrix from './matrix';
+import {isString} from './utils';
 import type {ActivationMethod, Vector, Options, ResultForward, ResultBackward, ResultTrain} from './types';
 
 /* MAIN */
 
 //TODO: Generalize this to an arbitrary number of layers
-//TODO: Support custom activation functions
 
 class NeuralNetwork {
 
@@ -45,8 +45,8 @@ class NeuralNetwork {
 
     this.options = options;
 
-    this.activation0 = Activations[layer0.activation];
-    this.activation1 = Activations[layer1.activation];
+    this.activation0 = isString ( layer0.activation ) ? Activations[layer0.activation] : layer0.activation;
+    this.activation1 = isString ( layer1.activation ) ? Activations[layer1.activation] : layer1.activation;
     this.biases0 = biases0 ? decode ( biases0 ) : fill ( new Matrix ( 1, layer0.outputs ), Number.EPSILON );
     this.biases1 = biases1 ? decode ( biases1 ) : fill ( new Matrix ( 1, layer1.outputs ), Number.EPSILON );
     this.weights0 = weights0 ? decode ( weights0 ) : random ( layer0.inputs, layer0.outputs, -1, 1 );

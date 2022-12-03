@@ -25,6 +25,7 @@ describe ( 'Toygrad', () => {
     //TODO: softmax
     //TODO: softplus
     //TODO: tanh
+    //TODO: custom
 
   });
 

@@ -5,6 +5,8 @@ import type Matrix from './matrix';
 
 /* MAIN */
 
+type Activation = ActivationName | ActivationMethod;
+
 type ActivationName = 'leakyrelu' | 'relu' | 'sigmoid' | 'softmax' | 'softplus' | 'tanh';
 
 type ActivationMethodSingle = (( x: number, derivative: boolean ) => number) & { multi?: false };
@@ -18,7 +20,7 @@ type Vector = number[];
 type Layer = {
   inputs: number,
   outputs: number,
-  activation: ActivationName,
+  activation: Activation,
   biases?: string,
   weights?: string
 };
@@ -51,6 +53,6 @@ type ResultTrain = [
 
 /* EXPORT */
 
-export type {ActivationName, ActivationMethod, Vector};
+export type {Activation, ActivationName, ActivationMethod, Vector};
 export type {Layer, Options};
 export type {ResultForward, ResultBackward, ResultTrain};
