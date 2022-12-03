@@ -7,7 +7,7 @@ import type Matrix from './matrix';
 
 type Activation = ActivationName | ActivationMethod;
 
-type ActivationName = 'leakyrelu' | 'relu' | 'sigmoid' | 'softmax' | 'softplus' | 'tanh';
+type ActivationName = 'identity' | 'leakyrelu' | 'relu' | 'sigmoid' | 'softmax' | 'softplus' | 'tanh';
 
 type ActivationMethodSingle = (( x: number, derivative: boolean ) => number) & { multi?: false };
 

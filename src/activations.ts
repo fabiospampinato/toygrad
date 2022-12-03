@@ -6,6 +6,14 @@ import type Matrix from './matrix';
 
 /* MAIN */
 
+const identity = ( x: number, derivative: boolean ): number => {
+  if ( derivative ) {
+    return 1;
+  } else {
+    return x;
+  }
+};
+
 const leakyrelu = ( x: number, derivative: boolean ): number => {
   if ( derivative ) {
     return ( x < 0 ) ? .01 : 1;
@@ -60,4 +68,4 @@ const tanh = ( x: number, derivative: boolean ): number => {
 
 /* EXPORT */
 
-export {leakyrelu, relu, sigmoid, softmax, softplus, tanh};
+export {identity, leakyrelu, relu, sigmoid, softmax, softplus, tanh};

@@ -19,6 +19,7 @@ describe ( 'Toygrad', () => {
 
   describe ( 'activations', () => {
 
+    //TODO: identity
     //TODO: leakyrelu
     //TODO: relu
     //TODO: sigmoid
