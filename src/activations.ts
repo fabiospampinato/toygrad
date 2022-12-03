@@ -1,4 +1,9 @@
 
+/* IMPORT */
+
+import {map, sum} from './ops';
+import type Matrix from './matrix';
+
 /* MAIN */
 
 const leakyrelu = ( x: number, derivative: boolean ): number => {
@@ -26,6 +31,16 @@ const sigmoid = ( x: number, derivative: boolean ): number => {
   }
 };
 
+const softmax = Object.assign (( x: Matrix, derivative: boolean ): Matrix => {
+  const exp = map ( x, Math.exp );
+  const total = sum ( exp );
+  if ( derivative ) {
+    return map ( exp, x => ( x / total ) * ( 1 - ( x / total ) ) );
+  } else {
+    return map ( exp, x => x / total );
+  }
+}, { multi: true } );
+
 const softplus = ( x: number, derivative: boolean ): number => {
   if ( derivative ) {
     return 1 / ( 1 + Math.exp ( -x ) );
@@ -45,4 +60,4 @@ const tanh = ( x: number, derivative: boolean ): number => {
 
 /* EXPORT */
 
-export {leakyrelu, relu, sigmoid, softplus, tanh};
+export {leakyrelu, relu, sigmoid, softmax, softplus, tanh};

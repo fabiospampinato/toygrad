@@ -22,6 +22,7 @@ describe ( 'Toygrad', () => {
     //TODO: leakyrelu
     //TODO: relu
     //TODO: sigmoid
+    //TODO: softmax
     //TODO: softplus
     //TODO: tanh
 

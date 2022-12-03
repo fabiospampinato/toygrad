@@ -5,16 +5,20 @@ import type Matrix from './matrix';
 
 /* MAIN */
 
-type Activation = 'leakyrelu' | 'relu' | 'sigmoid' | 'softplus' | 'tanh';
+type ActivationName = 'leakyrelu' | 'relu' | 'sigmoid' | 'softmax' | 'softplus' | 'tanh';
 
-type ActivationFN = ( x: number, derivative: boolean ) => number;
+type ActivationMethodSingle = (( x: number, derivative: boolean ) => number) & { multi?: false };
+
+type ActivationMethodMultiple = (( x: Matrix, derivative: boolean ) => Matrix) & { multi: true };
+
+type ActivationMethod = ActivationMethodSingle | ActivationMethodMultiple;
 
 type Vector = number[];
 
 type Layer = {
   inputs: number,
   outputs: number,
-  activation: Activation,
+  activation: ActivationName,
   biases?: string,
   weights?: string
 };
@@ -47,6 +51,6 @@ type ResultTrain = [
 
 /* EXPORT */
 
-export type {Activation, ActivationFN, Vector};
+export type {ActivationName, ActivationMethod, Vector};
 export type {Layer, Options};
 export type {ResultForward, ResultBackward, ResultTrain};

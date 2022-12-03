@@ -6,12 +6,11 @@ import {encode, decode} from './encoder';
 import {abs, activate, add, fill, from, map, map2, mean, mae, mse, multiply, product, random, scale, subtract, transpose} from './ops';
 import {fusedAddProductScale, fusedAddScale, fusedProductBiased} from './ops';
 import Matrix from './matrix';
-import type {ActivationFN, Vector, Options, ResultForward, ResultBackward, ResultTrain} from './types';
+import type {ActivationMethod, Vector, Options, ResultForward, ResultBackward, ResultTrain} from './types';
 
 /* MAIN */
 
 //TODO: Generalize this to an arbitrary number of layers
-//TODO: Support a softmax layer
 //TODO: Support custom activation functions
 
 class NeuralNetwork {
@@ -20,8 +19,8 @@ class NeuralNetwork {
 
   options: Options;
 
-  activation0: ActivationFN;
-  activation1: ActivationFN;
+  activation0: ActivationMethod;
+  activation1: ActivationMethod;
   biases0: Matrix;
   biases1: Matrix;
   weights0: Matrix;

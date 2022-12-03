@@ -2,7 +2,7 @@
 /* IMPORT */
 
 import Matrix from './matrix';
-import type {ActivationFN} from './types';
+import type {ActivationMethod} from './types';
 
 /* MAIN */
 
@@ -12,8 +12,12 @@ const abs = ( x: Matrix ): Matrix => {
   return map ( x, Math.abs );
 };
 
-const activate = ( x: Matrix, activation: ActivationFN, derivative: boolean ): Matrix => {
-  return map ( x, x => activation ( x, derivative ) );
+const activate = ( x: Matrix, activation: ActivationMethod, derivative: boolean ): Matrix => {
+  if ( activation.multi ) {
+    return activation ( x, derivative );
+  } else {
+    return map ( x, x => activation ( x, derivative ) );
+  }
 };
 
 const add = ( x: Matrix, y: Matrix ): Matrix => {
