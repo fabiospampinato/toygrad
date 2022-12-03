@@ -273,16 +273,6 @@ const fusedAddScale = ( x: Matrix, y: Matrix, factor: number ): Matrix => {
   return matrix;
 };
 
-const fusedMultiplyMapActivation = ( x: Matrix, y: Matrix, activation: Identity<number> ): Matrix => {
-  const matrix = new Matrix ( x.rows, x.cols );
-  for ( let i = 0, l = x.rows; i < l; i++ ) {
-    for ( let j = 0, m = x.cols; j < m; j++ ) {
-      matrix.set ( i, j, x.get ( i, j ) * activation ( y.get ( i, j ) ) );
-    }
-  }
-  return matrix;
-};
-
 const fusedProductBiased = ( x: Matrix, y: Matrix, biases: Matrix ): Matrix => {
   const matrix = new Matrix ( x.rows, y.cols );
   for ( let i = 0, l = x.rows; i < l; i++ ) {
@@ -300,4 +290,4 @@ const fusedProductBiased = ( x: Matrix, y: Matrix, biases: Matrix ): Matrix => {
 /* EXPORT */
 
 export {abs, add, ceil, column, count, cube, diagonal, divide, each, each2, fill, floor, from, identity, log2, log10, map, map2, mean, mae, max, min, modulo, mse, multiply, ones, pow, product, random, reduce, reduce2, resize, round, row, scale, sign, size, sqrt, square, subtract, sum, trace, transpose, zeros};
-export {fusedAddProductScale, fusedAddScale, fusedMultiplyMapActivation, fusedProductBiased};
+export {fusedAddProductScale, fusedAddScale, fusedProductBiased};

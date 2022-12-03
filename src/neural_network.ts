@@ -3,8 +3,8 @@
 
 import * as Activations from './activations';
 import {encode, decode} from './encoder';
-import {abs, add, fill, from, map, map2, mean, mse, multiply, product, random, scale, subtract, transpose} from './ops';
-import {fusedAddProductScale, fusedAddScale, fusedMultiplyMapActivation, fusedProductBiased} from './ops';
+import {abs, add, fill, from, map, map2, mean, mae, mse, multiply, product, random, scale, subtract, transpose} from './ops';
+import {fusedAddProductScale, fusedAddScale, fusedProductBiased} from './ops';
 import Matrix from './matrix';
 import type {Identity, Vector, Options, ResultForward, ResultBackward, ResultTrain} from './types';
 
@@ -85,11 +85,9 @@ class NeuralNetwork {
     const [weighted0, weighted1, activated0, activated1] = forward;
 
     const error1 = subtract ( from ( outputs ), activated1 );
-    // const gradient1 = multiply ( error1, map ( activated1, this.activation1d ) );
-    const gradient1 = fusedMultiplyMapActivation ( error1, activated1, this.activation1d );
+    const gradient1 = multiply ( error1, map ( activated1, this.activation1d ) );
     const error0 = product ( gradient1, transpose ( this.weights1 ) );
-    // const gradient0 = multiply ( error0, map ( activated0, this.activation0d ) );
-    const gradient0 = fusedMultiplyMapActivation ( error0, activated0, this.activation0d );
+    const gradient0 = multiply ( error0, map ( activated0, this.activation0d ) );
     const result: ResultBackward = [error0, error1, gradient0, gradient1];
 
     // this.biases1 = add ( this.biases1, scale ( gradient1, learningRate / 2 ) );
