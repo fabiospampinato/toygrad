@@ -3,7 +3,7 @@
 
 import * as Activations from './activations';
 import {encode, decode} from './encoder';
-import {abs, add, from, map, map2, mean, mse, multiply, product, random, scale, subtract, transpose} from './ops';
+import {abs, add, fill, from, map, map2, mean, mse, multiply, product, random, scale, subtract, transpose} from './ops';
 import {fusedAddProductScale, fusedAddScale, fusedMultiplyMapActivation, fusedProductBiased} from './ops';
 import Matrix from './matrix';
 import type {Identity, Vector, Options, ResultForward, ResultBackward, ResultTrain} from './types';
@@ -54,8 +54,8 @@ class NeuralNetwork {
     this.activation0d = x => activation0 ( x, true );
     this.activation1d = x => activation1 ( x, true );
 
-    this.biases0 = biases0 ? decode ( biases0 ) : new Matrix ( 1, layer0.outputs );
-    this.biases1 = biases1 ? decode ( biases1 ) : new Matrix ( 1, layer1.outputs );
+    this.biases0 = biases0 ? decode ( biases0 ) : fill ( new Matrix ( 1, layer0.outputs ), Number.EPSILON );
+    this.biases1 = biases1 ? decode ( biases1 ) : fill ( new Matrix ( 1, layer1.outputs ), Number.EPSILON );
     this.weights0 = weights0 ? decode ( weights0 ) : random ( layer0.inputs, layer0.outputs, -1, 1 );
     this.weights1 = weights1 ? decode ( weights1 ) : random ( layer1.inputs, layer1.outputs, -1, 1 );
 
