@@ -3,10 +3,10 @@
 
 import * as Activations from './activations';
 import {encode, decode} from './encoder';
-import {abs, add, fill, from, map, map2, mean, mae, mse, multiply, product, random, scale, subtract, transpose} from './ops';
+import {abs, activate, add, fill, from, map, map2, mean, mae, mse, multiply, product, random, scale, subtract, transpose} from './ops';
 import {fusedAddProductScale, fusedAddScale, fusedProductBiased} from './ops';
 import Matrix from './matrix';
-import type {Identity, Vector, Options, ResultForward, ResultBackward, ResultTrain} from './types';
+import type {ActivationFN, Vector, Options, ResultForward, ResultBackward, ResultTrain} from './types';
 
 /* MAIN */
 
@@ -20,11 +20,8 @@ class NeuralNetwork {
 
   options: Options;
 
-  activation0: Identity<number>;
-  activation1: Identity<number>;
-  activation0d: Identity<number>;
-  activation1d: Identity<number>;
-
+  activation0: ActivationFN;
+  activation1: ActivationFN;
   biases0: Matrix;
   biases1: Matrix;
   weights0: Matrix;
@@ -46,16 +43,11 @@ class NeuralNetwork {
     const biases1 = layer1.biases;
     const weights0 = layer0.weights;
     const weights1 = layer1.weights;
-    const activation0 = Activations[layer0.activation];
-    const activation1 = Activations[layer1.activation];
 
     this.options = options;
 
-    this.activation0 = x => activation0 ( x, false );
-    this.activation1 = x => activation1 ( x, false );
-    this.activation0d = x => activation0 ( x, true );
-    this.activation1d = x => activation1 ( x, true );
-
+    this.activation0 = Activations[layer0.activation];
+    this.activation1 = Activations[layer1.activation];
     this.biases0 = biases0 ? decode ( biases0 ) : fill ( new Matrix ( 1, layer0.outputs ), Number.EPSILON );
     this.biases1 = biases1 ? decode ( biases1 ) : fill ( new Matrix ( 1, layer1.outputs ), Number.EPSILON );
     this.weights0 = weights0 ? decode ( weights0 ) : random ( layer0.inputs, layer0.outputs, -1, 1 );
@@ -69,10 +61,10 @@ class NeuralNetwork {
 
     // const weighted0 = add ( product ( from ( inputs ), this.weights0 ), this.biases0 );
     const weighted0 = fusedProductBiased ( from ( inputs ), this.weights0, this.biases0 );
-    const activated0 = map ( weighted0, this.activation0 );
+    const activated0 = activate ( weighted0, this.activation0, false );
     // const weighted1 = add ( product ( activated0, this.weights1 ), this.biases1 );
     const weighted1 = fusedProductBiased ( activated0, this.weights1, this.biases1 );
-    const activated1 = map ( weighted1, this.activation1 );
+    const activated1 = activate ( weighted1, this.activation1, false );
     const result: ResultForward = [weighted0, weighted1, activated0, activated1];
 
     return result;
@@ -85,9 +77,9 @@ class NeuralNetwork {
     const [weighted0, weighted1, activated0, activated1] = forward;
 
     const error1 = subtract ( from ( outputs ), activated1 );
-    const gradient1 = multiply ( error1, map ( activated1, this.activation1d ) );
+    const gradient1 = multiply ( error1, activate ( activated1, this.activation1, true ) );
     const error0 = product ( gradient1, transpose ( this.weights1 ) );
-    const gradient0 = multiply ( error0, map ( activated0, this.activation0d ) );
+    const gradient0 = multiply ( error0, activate ( activated0, this.activation0, true ) );
     const result: ResultBackward = [error0, error1, gradient0, gradient1];
 
     // this.biases1 = add ( this.biases1, scale ( gradient1, learningRate / 2 ) );
@@ -158,18 +150,19 @@ class NeuralNetwork {
         `if ( !_._ ) {` +
           `_._ = true;` +
           `${Matrix.toString ()};` +
+          `const map = ${map.toString ()};` +
+          `_.a = ${activate.toString ()};` +
           `_.f = ${from.toString ()};` +
-          `_.m = ${map.toString ()};` +
           `_.pb = ${fusedProductBiased.toString ()};` +
           `_.d = ${decode.toString ()};` +
-          `_.a0 = ${Activations[this.options.layers[0].activation].toString ()};` +
-          `_.a1 = ${Activations[this.options.layers[1].activation].toString ()};` +
+          `_.a0 = ${this.activation0.toString ()};` +
+          `_.a1 = ${this.activation1.toString ()};` +
           `_.b0 = _.d ( '${encode ( this.biases0 )}' );` +
           `_.b1 = _.d ( '${encode ( this.biases1 )}' );` +
           `_.w0 = _.d ( '${encode ( this.weights0 )}' );` +
           `_.w1 = _.d ( '${encode ( this.weights1 )}' );` +
         `}` +
-        `return Array.from ( _.m ( _.pb ( _.m ( _.pb ( _.f ( [input] ), _.w0, _.b0 ), _.a0 ), _.w1, _.b1 ), _.a1 ).buffer );` +
+        `return Array.from ( _.a ( _.pb ( _.a ( _.pb ( _.f ( [input] ), _.w0, _.b0 ), _.a0, false ), _.w1, _.b1 ), _.a1, false ).buffer );` +
       `})`
     ];
 

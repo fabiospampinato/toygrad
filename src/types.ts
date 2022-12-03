@@ -7,7 +7,7 @@ import type Matrix from './matrix';
 
 type Activation = 'leakyrelu' | 'relu' | 'sigmoid' | 'softplus' | 'tanh';
 
-type Identity<T> = ( x: T ) => T;
+type ActivationFN = ( x: number, derivative: boolean ) => number;
 
 type Vector = number[];
 
@@ -47,6 +47,6 @@ type ResultTrain = [
 
 /* EXPORT */
 
-export type {Activation, Identity, Vector};
+export type {Activation, ActivationFN, Vector};
 export type {Layer, Options};
 export type {ResultForward, ResultBackward, ResultTrain};

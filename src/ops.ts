@@ -2,7 +2,7 @@
 /* IMPORT */
 
 import Matrix from './matrix';
-import type {Identity} from './types';
+import type {ActivationFN} from './types';
 
 /* MAIN */
 
@@ -10,6 +10,10 @@ import type {Identity} from './types';
 
 const abs = ( x: Matrix ): Matrix => {
   return map ( x, Math.abs );
+};
+
+const activate = ( x: Matrix, activation: ActivationFN, derivative: boolean ): Matrix => {
+  return map ( x, x => activation ( x, derivative ) );
 };
 
 const add = ( x: Matrix, y: Matrix ): Matrix => {
@@ -289,5 +293,5 @@ const fusedProductBiased = ( x: Matrix, y: Matrix, biases: Matrix ): Matrix => {
 
 /* EXPORT */
 
-export {abs, add, ceil, column, count, cube, diagonal, divide, each, each2, fill, floor, from, identity, log2, log10, map, map2, mean, mae, max, min, modulo, mse, multiply, ones, pow, product, random, reduce, reduce2, resize, round, row, scale, sign, size, sqrt, square, subtract, sum, trace, transpose, zeros};
+export {abs, activate, add, ceil, column, count, cube, diagonal, divide, each, each2, fill, floor, from, identity, log2, log10, map, map2, mean, mae, max, min, modulo, mse, multiply, ones, pow, product, random, reduce, reduce2, resize, round, row, scale, sign, size, sqrt, square, subtract, sum, trace, transpose, zeros};
 export {fusedAddProductScale, fusedAddScale, fusedProductBiased};
