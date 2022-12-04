@@ -3,7 +3,7 @@
 
 import * as Activations from './activations';
 import {encode, decode} from './encoder';
-import {abs, activate, add, fill, from, map, map2, mean, mae, mse, multiply, product, random, scale, subtract, transpose} from './ops';
+import {abs, activate, add, each, every, fill, from, map, map2, mean, mae, mse, multiply, product, random, reduce, scale, subtract, sum, transpose} from './ops';
 import {fusedAddProductScale, fusedAddScale, fusedProductBiased} from './ops';
 import Matrix from './matrix';
 import {isString} from './utils';
@@ -104,7 +104,9 @@ class NeuralNetwork {
 
     const forward = this.forward ( inputs );
     const backward = this.backward ( inputs, outputs, forward );
-    const result = this.trainResultLast = [inputs, outputs, forward, backward];
+    const result: ResultTrain = [inputs, outputs, forward, backward];
+
+    this.trainResultLast = result;
 
     return result;
 
