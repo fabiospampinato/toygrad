@@ -149,19 +149,28 @@ class NeuralNetwork {
         `if ( !_._ ) {` +
           `_._ = true;` +
           `${Matrix.toString ()};` +
+          `const each = ${each.toString ()};` +
           `const map = ${map.toString ()};` +
+          `const reduce = ${reduce.toString ()};` +
+          `const sum = ${sum.toString ()};` +
           `_.a = ${activate.toString ()};` +
           `_.f = ${from.toString ()};` +
           `_.pb = ${fusedProductBiased.toString ()};` +
           `_.d = ${decode.toString ()};` +
           `_.a0 = ${this.activation0.toString ()};` +
+          `_.a0.multi = ${this.activation0.multi ? 'true' : 'false'};` +
           `_.a1 = ${this.activation1.toString ()};` +
+          `_.a1.multi = ${this.activation1.multi ? 'true' : 'false'};` +
           `_.b0 = _.d ( '${encode ( this.biases0 )}' );` +
           `_.b1 = _.d ( '${encode ( this.biases1 )}' );` +
           `_.w0 = _.d ( '${encode ( this.weights0 )}' );` +
           `_.w1 = _.d ( '${encode ( this.weights1 )}' );` +
         `}` +
-        `return Array.from ( _.a ( _.pb ( _.a ( _.pb ( _.f ( [input] ), _.w0, _.b0 ), _.a0, false ), _.w1, _.b1 ), _.a1, false ).buffer );` +
+        `const weighted0 = _.pb ( _.f ( [input] ), _.w0, _.b0 );` +
+        `const activated0 = _.a ( weighted0, _.a0, false );` +
+        `const weighted1 = _.pb ( activated0, _.w1, _.b1 );` +
+        `const activated1 = _.a ( weighted1, _.a1, false );` +
+        `return Array.from ( activated1.buffer );` +
       `})`
     ];
 
