@@ -43,6 +43,8 @@ console.log ( '0^1 ->', nn.infer ( [0, 1] )[0] );
 console.log ( '1^1 ->', nn.infer ( [1, 1] )[0] );
 console.log ( '' );
 
+console.log ( nn.exportAsFunction ().toString () );
+
 /* EXPORT */
 
 export default nn;
