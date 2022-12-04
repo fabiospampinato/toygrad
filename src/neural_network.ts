@@ -81,10 +81,10 @@ class NeuralNetwork {
     const gradient0 = multiply ( error0, activate ( activated0, this.activation0, true ) );
     const result: ResultBackward = [error0, error1, gradient0, gradient1];
 
-    // this.biases1 = add ( this.biases1, scale ( gradient1, learningRate / 2 ) );
-    this.biases1 = fusedAddScale ( this.biases1, gradient1, learningRate / 2 );
-    // this.biases0 = add ( this.biases0, scale ( gradient0, learningRate / 2 ) );
-    this.biases0 = fusedAddScale ( this.biases0, gradient0, learningRate / 2 );
+    // this.biases1 = add ( this.biases1, scale ( gradient1, learningRate ) );
+    this.biases1 = fusedAddScale ( this.biases1, gradient1, learningRate );
+    // this.biases0 = add ( this.biases0, scale ( gradient0, learningRate ) );
+    this.biases0 = fusedAddScale ( this.biases0, gradient0, learningRate );
     // this.weights1 = add ( this.weights1, product ( transpose ( activated0 ), scale ( gradient1, learningRate ) ) );
     this.weights1 = fusedAddProductScale ( this.weights1, transpose ( activated0 ), gradient1, learningRate );
     // this.weights0 = add ( this.weights0, product ( transpose ( from ( inputs ) ), scale ( gradient0, learningRate ) ) );

@@ -261,6 +261,8 @@ const zeros = ( rows: number, cols: number ): Matrix => {
 
 /* FUSED */
 
+// These functions are potentially impure fused versions of multiple ops
+
 const fusedAddProductScale = ( x: Matrix, y: Matrix, z: Matrix, factor: number ): Matrix => {
   const matrix = new Matrix ( y.rows, z.cols );
   for ( let i = 0, l = y.rows; i < l; i++ ) {
