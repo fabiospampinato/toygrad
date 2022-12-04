@@ -43,9 +43,9 @@ const softmax = Object.assign (( x: Matrix, derivative: boolean ): Matrix => {
   const exp = map ( x, Math.exp );
   const total = sum ( exp );
   if ( derivative ) {
-    return map ( exp, x => ( x / total ) * ( 1 - ( x / total ) ) );
+    return map ( exp, x => ( ( x / total ) || 0 ) * ( 1 - ( ( x / total ) || 0 ) ) );
   } else {
-    return map ( exp, x => x / total );
+    return map ( exp, x => ( x / total ) || 0 );
   }
 }, { multi: true } );
 
