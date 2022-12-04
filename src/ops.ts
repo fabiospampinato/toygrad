@@ -67,6 +67,10 @@ const each2 = ( x: Matrix, y: Matrix, iterator: ( x: number, y: number, row: num
   }
 };
 
+const every = ( x: Matrix, iterator: ( x: number ) => boolean ): boolean => {
+  return reduce ( x, ( acc, x ) => acc && iterator ( x ), true );
+};
+
 const fill = ( x: Matrix, value: number ): Matrix => {
   return map ( x, () => value );
 };
@@ -297,5 +301,5 @@ const fusedProductBiased = ( x: Matrix, y: Matrix, biases: Matrix ): Matrix => {
 
 /* EXPORT */
 
-export {abs, activate, add, ceil, column, count, cube, diagonal, divide, each, each2, fill, floor, from, identity, log2, log10, map, map2, mean, mae, max, min, modulo, mse, multiply, ones, pow, product, random, reduce, reduce2, resize, round, row, scale, sign, size, sqrt, square, subtract, sum, trace, transpose, zeros};
+export {abs, activate, add, ceil, column, count, cube, diagonal, divide, each, each2, every, fill, floor, from, identity, log2, log10, map, map2, mean, mae, max, min, modulo, mse, multiply, ones, pow, product, random, reduce, reduce2, resize, round, row, scale, sign, size, sqrt, square, subtract, sum, trace, transpose, zeros};
 export {fusedAddProductScale, fusedAddScale, fusedProductBiased};

@@ -4,7 +4,7 @@
 import {describe} from 'fava';
 import {relu, sigmoid, softplus, tanh} from '../dist/activations.js';
 import {encode, decode} from '../dist/encoder.js';
-import {abs, add, ceil, column, count, cube, diagonal, divide, each, each2, fill, floor, from, identity, log2, log10, map, map2, mean, mae, max, min, modulo, mse, multiply, ones, pow, product, random, reduce, reduce2, resize, round, row, scale, sign, size, sqrt, square, subtract, sum, trace, transpose, zeros} from '../dist/ops.js';
+import {abs, add, ceil, column, count, cube, diagonal, divide, each, each2, every, fill, floor, from, identity, log2, log10, map, map2, mean, mae, max, min, modulo, mse, multiply, ones, pow, product, random, reduce, reduce2, resize, round, row, scale, sign, size, sqrt, square, subtract, sum, trace, transpose, zeros} from '../dist/ops.js';
 import Matrix from '../dist/matrix.js';
 import NeuralNetwork from '../dist/neural_network.js';
 import ExampleXOR from '../examples/xor.js';
@@ -223,6 +223,22 @@ describe ( 'Toygrad', () => {
     });
 
     //TODO: each2
+
+    describe ( 'every', it => {
+
+      it ( 'checks that every value passes a condition', t => {
+
+        const input = from ([
+          [1, 2, 3],
+          [-3, -2, -1]
+        ]);
+
+        t.is ( every ( input, x => x < 4 ), true );
+        t.is ( every ( input, x => x > 2 ), false );
+
+      });
+
+    });
 
     describe ( 'fill', it => {
 
