@@ -2,7 +2,7 @@
   "name": "toygrad",
   "repository": "github:fabiospampinato/toygrad",
   "description": "A toy library for building simple feed-forward neural networks which can be exported to standalone compact JS functions.",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "type": "module",
   "main": "dist/index.js",
   "exports": "./dist/index.js",
