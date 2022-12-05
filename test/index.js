@@ -1073,7 +1073,7 @@ describe ( 'Toygrad', () => {
       const encoded = encode ( input, 'f16' );
       const decoded = decode ( encoded );
 
-      t.is ( encoded.length, 44 );
+      t.is ( encoded.length, 32 );
       t.true ( Array.from ( input.buffer ).every ( ( x, i ) => distance ( x, decoded.buffer[i] ) < 0.05 ) );
 
     });
@@ -1089,7 +1089,7 @@ describe ( 'Toygrad', () => {
       const encoded = encode ( input, 'f32' );
       const decoded = decode ( encoded );
 
-      t.is ( encoded.length, 80 );
+      t.is ( encoded.length, 56 );
       t.deepEqual ( input.buffer, decoded.buffer );
 
     });
