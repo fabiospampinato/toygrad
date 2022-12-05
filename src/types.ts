@@ -15,6 +15,8 @@ type ActivationMethodMultiple = (( x: Matrix, derivative: boolean ) => Matrix) &
 
 type ActivationMethod = ActivationMethodSingle | ActivationMethodMultiple;
 
+type Precision = 'f16' | 'f32';
+
 type Vector = number[];
 
 type Layer = {
@@ -27,7 +29,8 @@ type Layer = {
 
 type Options = {
   layers: Layer[],
-  learningRate: number
+  learningRate: number,
+  precision?: Precision
 };
 
 type ResultForward = [
@@ -53,6 +56,6 @@ type ResultTrain = [
 
 /* EXPORT */
 
-export type {Activation, ActivationName, ActivationMethod, Vector};
+export type {Activation, ActivationName, ActivationMethod, Precision, Vector};
 export type {Layer, Options};
 export type {ResultForward, ResultBackward, ResultTrain};

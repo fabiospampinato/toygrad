@@ -7,7 +7,7 @@ import {abs, activate, add, each, every, fill, from, map, map2, mean, mae, mse, 
 import {fusedAddProductScale, fusedAddScale, fusedProductBiased} from './ops';
 import Matrix from './matrix';
 import {isString} from './utils';
-import type {ActivationMethod, Vector, Options, ResultForward, ResultBackward, ResultTrain} from './types';
+import type {ActivationMethod, Precision, Vector, Options, ResultForward, ResultBackward, ResultTrain} from './types';
 
 /* MAIN */
 
@@ -18,6 +18,7 @@ class NeuralNetwork {
   /* VARIABLES */
 
   options: Options;
+  precision: Precision;
 
   activation0: ActivationMethod;
   activation1: ActivationMethod;
@@ -44,6 +45,7 @@ class NeuralNetwork {
     const weights1 = layer1.weights;
 
     this.options = options;
+    this.precision = options.precision || 'f32';
 
     this.activation0 = isString ( layer0.activation ) ? Activations[layer0.activation] : layer0.activation;
     this.activation1 = isString ( layer1.activation ) ? Activations[layer1.activation] : layer1.activation;
@@ -163,10 +165,10 @@ class NeuralNetwork {
           `_.a0.multi = ${this.activation0.multi ? 'true' : 'false'};` +
           `_.a1 = ${this.activation1.toString ()};` +
           `_.a1.multi = ${this.activation1.multi ? 'true' : 'false'};` +
-          `_.b0 = _.d ( '${encode ( this.biases0 )}' );` +
-          `_.b1 = _.d ( '${encode ( this.biases1 )}' );` +
-          `_.w0 = _.d ( '${encode ( this.weights0 )}' );` +
-          `_.w1 = _.d ( '${encode ( this.weights1 )}' );` +
+          `_.b0 = _.d ( '${encode ( this.biases0, this.precision )}' );` +
+          `_.b1 = _.d ( '${encode ( this.biases1, this.precision )}' );` +
+          `_.w0 = _.d ( '${encode ( this.weights0, this.precision )}' );` +
+          `_.w1 = _.d ( '${encode ( this.weights1, this.precision )}' );` +
         `}` +
         `const weighted0 = _.pb ( _.f ( [input] ), _.w0, _.b0 );` +
         `const activated0 = _.a ( weighted0, _.a0, false );` +
@@ -238,15 +240,15 @@ class NeuralNetwork {
           inputs: this.options.layers[0].inputs,
           outputs: this.options.layers[0].outputs,
           activation: this.options.layers[0].activation,
-          biases: encode ( this.biases0 ),
-          weights: encode ( this.weights0 )
+          biases: encode ( this.biases0, this.precision ),
+          weights: encode ( this.weights0, this.precision )
         },
         {
           inputs: this.options.layers[1].inputs,
           outputs: this.options.layers[1].outputs,
           activation: this.options.layers[1].activation,
-          biases: encode ( this.biases1 ),
-          weights: encode ( this.weights1 )
+          biases: encode ( this.biases1, this.precision ),
+          weights: encode ( this.weights1, this.precision )
         }
       ],
       learningRate: this.options.learningRate

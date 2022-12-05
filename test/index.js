@@ -833,7 +833,7 @@ describe ( 'Toygrad', () => {
 
   describe ( 'nn', it => {
 
-    it ( 'can export the model as options and import it again', t => {
+    it ( 'can export the model as options and import it again, with f32 precision', t => {
 
       const nn1 = new NeuralNetwork ({
         layers: [
@@ -848,7 +848,8 @@ describe ( 'Toygrad', () => {
             activation: 'tanh'
           }
         ],
-        learningRate: .1
+        learningRate: .1,
+        precision: 'f32'
       });
 
       for ( let i = 1; i < 1000; i++ ) {
@@ -877,10 +878,9 @@ describe ( 'Toygrad', () => {
 
     });
 
-    it ( 'can export the model as a standalone function', t => {
+    it ( 'can export the model as options and import it again, with f16 precision', t => {
 
       const nn1 = new NeuralNetwork ({
-        learningRate: .1,
         layers: [
           {
             inputs: 2,
@@ -892,7 +892,54 @@ describe ( 'Toygrad', () => {
             outputs: 1,
             activation: 'tanh'
           }
-        ]
+        ],
+        learningRate: .1,
+        precision: 'f16'
+      });
+
+      for ( let i = 1; i < 1000; i++ ) {
+        nn1.trainSingle ( [0, 0], [0] );
+        nn1.trainSingle ( [0, 1], [1] );
+        nn1.trainSingle ( [1, 0], [1] );
+        nn1.trainSingle ( [1, 1], [0] );
+      }
+
+      const i00 = nn1.infer ( [0, 0] )[0];
+      const i10 = nn1.infer ( [1, 0] )[0];
+      const i01 = nn1.infer ( [0, 1] )[0];
+      const i11 = nn1.infer ( [1, 1] )[0];
+
+      const nn2 = new NeuralNetwork ( nn1.exportAsOptions () );
+
+      const o00 = nn2.infer ( [0, 0] )[0];
+      const o10 = nn2.infer ( [1, 0] )[0];
+      const o01 = nn2.infer ( [0, 1] )[0];
+      const o11 = nn2.infer ( [1, 1] )[0];
+
+      t.true ( distance ( i00, o00 ) < 0.05 );
+      t.true ( distance ( i10, o10 ) < 0.05 );
+      t.true ( distance ( i01, o01 ) < 0.05 );
+      t.true ( distance ( i11, o11 ) < 0.05 );
+
+    });
+
+    it ( 'can export the model as a standalone function, with f32 precision', t => {
+
+      const nn1 = new NeuralNetwork ({
+        layers: [
+          {
+            inputs: 2,
+            outputs: 4,
+            activation: 'tanh'
+          },
+          {
+            inputs: 4,
+            outputs: 1,
+            activation: 'tanh'
+          }
+        ],
+        learningRate: .1,
+        precision: 'f32'
       });
 
       for ( let i = 1; i < 1000; i++ ) {
@@ -918,6 +965,51 @@ describe ( 'Toygrad', () => {
       t.is ( i10, o10 );
       t.is ( i01, o01 );
       t.is ( i11, o11 );
+
+    });
+
+    it ( 'can export the model as a standalone function, with f16 precision', t => {
+
+      const nn1 = new NeuralNetwork ({
+        layers: [
+          {
+            inputs: 2,
+            outputs: 4,
+            activation: 'tanh'
+          },
+          {
+            inputs: 4,
+            outputs: 1,
+            activation: 'tanh'
+          }
+        ],
+        learningRate: .1,
+        precision: 'f16'
+      });
+
+      for ( let i = 1; i < 1000; i++ ) {
+        nn1.trainSingle ( [0, 0], [0] );
+        nn1.trainSingle ( [0, 1], [1] );
+        nn1.trainSingle ( [1, 0], [1] );
+        nn1.trainSingle ( [1, 1], [0] );
+      }
+
+      const i00 = nn1.infer ( [0, 0] )[0];
+      const i10 = nn1.infer ( [1, 0] )[0];
+      const i01 = nn1.infer ( [0, 1] )[0];
+      const i11 = nn1.infer ( [1, 1] )[0];
+
+      const fn = nn1.exportAsFunction ();
+
+      const o00 = fn ( [0, 0] )[0];
+      const o10 = fn ( [1, 0] )[0];
+      const o01 = fn ( [0, 1] )[0];
+      const o11 = fn ( [1, 1] )[0];
+
+      t.true ( distance ( i00, o00 ) < 0.05 );
+      t.true ( distance ( i10, o10 ) < 0.05 );
+      t.true ( distance ( i01, o01 ) < 0.05 );
+      t.true ( distance ( i11, o11 ) < 0.05 );
 
     });
 
@@ -970,7 +1062,7 @@ describe ( 'Toygrad', () => {
 
   describe ( 'encoder', it => {
 
-    it ( 'support encoder and decoding', t => {
+    it ( 'support encoder and decoding, with f16 precision', t => {
 
       const input = from ([
         [1, 2, 3],
@@ -978,10 +1070,26 @@ describe ( 'Toygrad', () => {
         [1, 1.5, 1.11]
       ]);
 
-      const encoded = encode ( input );
+      const encoded = encode ( input, 'f16' );
       const decoded = decode ( encoded );
 
-      t.is ( encoded.length, 74 );
+      t.is ( encoded.length, 44 );
+      t.true ( Array.from ( input.buffer ).every ( ( x, i ) => distance ( x, decoded.buffer[i] ) < 0.05 ) );
+
+    });
+
+    it ( 'support encoder and decoding, with f32 precision', t => {
+
+      const input = from ([
+        [1, 2, 3],
+        [-3, -2, -1],
+        [1, 1.5, 1.11]
+      ]);
+
+      const encoded = encode ( input, 'f32' );
+      const decoded = decode ( encoded );
+
+      t.is ( encoded.length, 80 );
       t.deepEqual ( input.buffer, decoded.buffer );
 
     });
