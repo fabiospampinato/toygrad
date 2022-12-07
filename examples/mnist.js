@@ -1,4 +1,7 @@
 
+// DATASET: https://www.kaggle.com/datasets/oddrationale/mnist-in-csv
+// DEMO: https://playground.solidjs.com/anonymous/14ec5b8a-a519-4dbc-88b6-0ba00f445f9e
+
 /* IMPORT */
 
 import _ from 'lodash';
@@ -11,7 +14,7 @@ import {NeuralNetwork, Tensor, Trainers} from '../dist/index.js';
 const FULL_SIZE = 28;
 const CROP_SIZE = 24;
 
-const EPOCHS_LIMIT = 40;
+const EPOCHS_LIMIT = 2;
 const TRAIN_LIMIT = Infinity;
 const TEST_LIMIT = Infinity;
 
@@ -58,7 +61,7 @@ const nn = new NeuralNetwork ({
 });
 
 const trainer = new Trainers.Adadelta ( nn, {
-  batchSize: 20,
+  batchSize: 10,
   l2decay: 0.001
 });
 
