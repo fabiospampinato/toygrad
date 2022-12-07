@@ -1,7 +1,7 @@
 {
   "name": "toygrad",
   "repository": "github:fabiospampinato/toygrad",
-  "description": "A toy library for building simple feed-forward neural networks which can be exported to standalone compact JS functions.",
+  "description": "A toy library for building simple neural networks which can be serialized to compact JSON.",
   "version": "1.0.3",
   "type": "module",
   "main": "dist/index.js",
@@ -9,17 +9,13 @@
   "types": "./dist/index.d.ts",
   "sideEffects": false,
   "scripts": {
-    "benchmark": "tsex benchmark",
-    "benchmark:watch": "tsex benchmark --watch",
     "clean": "tsex clean",
     "compile": "tsex compile",
     "compile:watch": "tsex compile --watch",
     "example:all": "npm run example:xor && npm run example:mnist",
     "example:xor": "node examples/xor.js",
     "example:mnist": "node examples/mnist.js",
-    "test": "tsex test",
-    "test:watch": "tsex --watch",
-    "prepublishOnly": "npm run clean && npm run compile && npm run test"
+    "prepublishOnly": "npm run clean && npm run compile"
   },
   "keywords": [
     "toy",
@@ -29,9 +25,9 @@
     "network"
   ],
   "devDependencies": {
-    "benchloop": "^2.0.0",
     "fava": "^0.0.7",
     "lodash": "^4.17.21",
+    "mathjs": "^11.5.0",
     "tsex": "^1.1.4",
     "typescript": "^4.9.3"
   }

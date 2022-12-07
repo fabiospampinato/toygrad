@@ -2,52 +2,38 @@
 /* IMPORT */
 
 import _ from 'lodash';
+import {map, matrix, zeros} from 'mathjs';
 import fs from 'node:fs';
-import {from, map} from '../dist/ops.js';
-import Matrix from '../dist/matrix.js';
-import {NeuralNetwork} from '../dist/index.js';
+import {NeuralNetwork, Tensor, Trainers} from '../dist/index.js';
 
 /* HELPERS */
 
-const SIZE = 28;
-const CSIZE = 28;
+const FULL_SIZE = 28;
+const CROP_SIZE = 24;
 
-/* MAIN */
+const EPOCHS_LIMIT = 40;
+const TRAIN_LIMIT = Infinity;
+const TEST_LIMIT = Infinity;
 
-// DATASET: https://www.kaggle.com/datasets/oddrationale/mnist-in-csv
-// DEMO: https://playground.solidjs.com/anonymous/0a49c7e6-224b-4e00-9d98-bd121ba1cd34
+/* PARSE */
 
-const nn = new NeuralNetwork ({
-  learningRate: .1,
-  layers: [
-    {
-      inputs: CSIZE * CSIZE,
-      outputs: 64,
-      activation: 'leakyrelu'
-    },
-    {
-      inputs: 64,
-      outputs: 10,
-      activation: 'softmax'
-    }
-  ]
-});
-
-/* TRAIN */
+const argmax = arr => {
+  return arr.indexOf ( Math.max ( ...Array.from ( arr ) ) );
+};
 
 const crop = input => {
-  if ( SIZE === CSIZE ) return input;
-  const offsetRows = Math.round ( Math.random () * ( SIZE - CSIZE ) );
-  const offsetCols = Math.round ( Math.random () * ( SIZE - CSIZE ) );
-  const matrixInput = from ( _.chunk ( input, SIZE ) );
-  const matrixBase = new Matrix ( CSIZE, CSIZE );
-  const matrixPopulated = map ( matrixBase, ( _, row, col ) => matrixInput.get ( row + offsetRows, col + offsetCols ) );
-  return Array.from ( matrixPopulated.buffer );
+  if ( FULL_SIZE === CROP_SIZE ) return new Tensor ( FULL_SIZE, FULL_SIZE, 1, new Float32Array ( input ) );
+  const offsetRows = Math.round ( Math.random () * ( FULL_SIZE - CROP_SIZE ) );
+  const offsetCols = Math.round ( Math.random () * ( FULL_SIZE - CROP_SIZE ) );
+  const matrixInput = matrix ( _.chunk ( input, FULL_SIZE ) );
+  const matrixBase = matrix ( zeros ( [CROP_SIZE, CROP_SIZE] ) );
+  const matrixOutput = map ( matrixBase, ( _, [row, column] ) => matrixInput.get ( [row + offsetRows, column + offsetCols] ) );
+  return new Tensor ( CROP_SIZE, CROP_SIZE, 1, new Float32Array ( matrixOutput.toArray ().flat () ) );
 };
 
 const parseCSV = csv => {
   const values = csv.split ( ',' ).map ( Number );
-  const output = new Array ( 10 ).fill ( 0 ).map ( ( _, i ) => ( i === values[0] ) ? 1 : 0 );
+  const output = values[0];
   const input = crop ( values.slice ( 1 ).map ( x => x / 255 ) );
   return {input, output};
 };
@@ -55,25 +41,45 @@ const parseCSV = csv => {
 const TRAIN_SET = fs.readFileSync ( './examples/mnist_train.csv', 'utf8' ).split ( '\n' ).slice ( 1, -1 ).map ( parseCSV );
 const TEST_SET = fs.readFileSync ( './examples/mnist_test.csv', 'utf8' ).split ( '\n' ).slice ( 1, -1 ).map ( parseCSV );
 
-nn.trainLoop ( 3, () => {
-  const batch = _.shuffle ( TRAIN_SET );
-  for ( let i = 0, l = batch.length - 1; i < l; i += 1 ) {
-    const slice =  batch.slice ( i, i + 1 );
-    const inputs = slice.map ( x => x.input );
-    const outputs = slice.map ( x => x.output );
-    nn.trainMultiple ( inputs, outputs );
-  }
+/* TRAIN */
+
+const nn = new NeuralNetwork ({
+  layers: [
+    { type: 'input', sx: CROP_SIZE, sy: CROP_SIZE, sz: 1 },
+    { type: 'conv', sx: 5, filters: 6, stride: 1, pad: 2, bias: 0.1 },
+    { type: 'relu' },
+    { type: 'pool', sx: 2, stride: 2 },
+    { type: 'conv', sx: 5, filters: 12, stride: 1, pad: 2, bias: 0.1 },
+    { type: 'relu' },
+    { type: 'pool', sx: 3, stride: 3 },
+    { type: 'dense', filters: 10 },
+    { type: 'softmax' }
+  ]
 });
+
+const trainer = new Trainers.Adadelta ( nn, {
+  batchSize: 20,
+  l2decay: 0.001
+});
+
+for ( let epoch = 0; epoch < EPOCHS_LIMIT; epoch++ ) {
+  const batch = _.shuffle ( TRAIN_SET );
+  for ( let i = 0, l = Math.min ( TRAIN_LIMIT, batch.length ) - 1; i < l; i += 1 ) {
+    if ( i % 500 === 0 ) console.log ( i );
+    const sample = batch[i];
+    trainer.train ( sample.input, sample.output );
+  }
+}
 
 /* TEST */
 
 let pass = 0;
 let fail = 0;
 
-for ( let i = 0, l = TEST_SET.length; i < l; i++ ) {
-  const output = nn.infer ( TEST_SET[i].input );
-  const actual = output.indexOf ( Math.max ( ...output ) );
-  const expected = TEST_SET[i].output.indexOf ( 1 );
+for ( let i = 0, l = Math.min ( TEST_LIMIT, TEST_SET.length ); i < l; i++ ) {
+  const sample = TEST_SET[i];
+  const actual = argmax ( nn.forward ( sample.input, false ).w );
+  const expected = sample.output;
   if ( expected === actual ) {
     pass += 1;
   } else {

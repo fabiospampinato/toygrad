@@ -1,46 +1,48 @@
 
 /* IMPORT */
 
-import {NeuralNetwork} from '../dist/index.js';
+import {NeuralNetwork, Tensor, Trainers} from '../dist/index.js';
 
-/* MAIN */
+/* HELPERS */
+
+const argmax = arr => {
+  return arr.indexOf ( Math.max ( ...Array.from ( arr ) ) );
+};
+
+const toTensor = arr => {
+  return new Tensor ( 1, 1, 2, new Float32Array ( arr ) );
+};
+
+/* TRAIN */
 
 const nn = new NeuralNetwork ({
-  learningRate: .1,
   layers: [
-    {
-      inputs: 2,
-      outputs: 4,
-      activation: 'tanh'
-    },
-    {
-      inputs: 4,
-      outputs: 1,
-      activation: 'tanh'
-    }
+    { type: 'input', sx: 1, sy: 1, sz: 2 },
+    { type: 'dense', filters: 4 },
+    { type: 'tanh' },
+    { type: 'dense', filters: 2 },
+    { type: 'softmax' }
   ]
 });
 
-nn.trainLoop ( 50_000, () => {
-  nn.trainMultiple ( [[0, 0], [0, 1], [1, 0], [1, 1]], [[0], [1], [1], [0]] );
+const trainer = new Trainers.Adadelta ( nn, {
+  batchSize: 4
 });
 
-// for ( let i = 1; i < 50_000; i++ ) {
-//   nn.trainSingle ( [0, 0], [0] );
-//   nn.trainSingle ( [0, 1], [1] );
-//   nn.trainSingle ( [1, 0], [1] );
-//   nn.trainSingle ( [1, 1], [0] );
-// }
+for ( let i = 0, l = 50_000; i < l; i++ ) {
+  trainer.train ( toTensor ( [0, 0] ), 0 );
+  trainer.train ( toTensor ( [1, 0] ), 1 );
+  trainer.train ( toTensor ( [0, 1] ), 1 );
+  trainer.train ( toTensor ( [1, 1] ), 0 );
+}
 
-// for ( let i = 1; i < 50_000; i++ ) {
-//   nn.trainMultiple ( [[0, 0], [0, 1], [1, 0], [1, 1]], [[0], [1], [1], [0]] );
-// }
+/* TEST */
 
 console.log ( '' );
-console.log ( '0^0 ->', nn.infer ( [0, 0] )[0] );
-console.log ( '1^0 ->', nn.infer ( [1, 0] )[0] );
-console.log ( '0^1 ->', nn.infer ( [0, 1] )[0] );
-console.log ( '1^1 ->', nn.infer ( [1, 1] )[0] );
+console.log ( '0^0 ->', argmax ( nn.forward ( toTensor ( [0, 0] ), false ).w ) );
+console.log ( '1^0 ->', argmax ( nn.forward ( toTensor ( [1, 0] ), false ).w ) );
+console.log ( '0^1 ->', argmax ( nn.forward ( toTensor ( [0, 1] ), false ).w ) );
+console.log ( '1^1 ->', argmax ( nn.forward ( toTensor ( [1, 1] ), false ).w ) );
 console.log ( '' );
 
 /* EXPORT */
