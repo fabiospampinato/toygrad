@@ -3,6 +3,7 @@
 
 import AbstractHidden from '~/layers/abstract_hidden';
 import Buffer from '~/buffer';
+import Encoder from '~/encoder';
 import Tensor from '~/tensor';
 import {range} from '~/utils';
 import type Abstract from '~/layers/abstract';
@@ -35,8 +36,8 @@ class Dense extends AbstractHidden<DenseOptions> {
     this.l1decay = options.l1decay ?? 0;
     this.l2decay = options.l2decay ?? 1;
 
-    this.biases = options._biases ? new Tensor ( 1, 1, this.osz, Buffer.decode ( options._biases ) ) : new Tensor ( 1, 1, this.osz, this.bias );
-    this.filters = options._filters ? options._filters.map ( filter => new Tensor ( 1, 1, this.il, Buffer.decode ( filter ) ) ) : range ( 0, this.osz ).map ( () => new Tensor ( 1, 1, this.il ) );
+    this.biases = options._biases ? new Tensor ( 1, 1, this.osz, Encoder.decode ( options._biases ) ) : new Tensor ( 1, 1, this.osz, this.bias );
+    this.filters = options._filters ? options._filters.map ( filter => new Tensor ( 1, 1, this.il, Encoder.decode ( filter ) ) ) : range ( 0, this.osz ).map ( () => new Tensor ( 1, 1, this.il ) );
 
   }
 
@@ -86,8 +87,8 @@ class Dense extends AbstractHidden<DenseOptions> {
 
     return {
       ...this.options,
-      _biases: Buffer.encode ( this.biases.w, precision ),
-      _filters: this.filters.map ( filter => Buffer.encode ( filter.w, precision ) )
+      _biases: Encoder.encode ( this.biases.w, precision ),
+      _filters: this.filters.map ( filter => Encoder.encode ( filter.w, precision ) )
     };
 
   }
