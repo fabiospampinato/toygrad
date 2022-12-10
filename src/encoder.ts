@@ -14,7 +14,6 @@ const Encoder = {
 
     const uint8 = new Uint8Array ( buffer.buffer );
 
-    let encoded = `${precision}|${buffer.length}|`;
     let bytes = '';
 
     if ( precision === 'f32' ) {
@@ -23,6 +22,8 @@ const Encoder = {
         bytes += String.fromCharCode ( uint8[i] );
       }
 
+      return `4${btoa ( bytes )}`;
+
     } else if ( precision === 'f16' ) {
 
       for ( let i = 0, l = uint8.length; i < l; i += 4 ) {
@@ -30,29 +31,25 @@ const Encoder = {
         bytes += String.fromCharCode ( uint8[i + 3] );
       }
 
+      return `2${btoa ( bytes )}`;
+
     } else {
 
       throw new Error ( 'Unsupported precision' );
 
     }
 
-    encoded += btoa ( bytes );
-
-    return encoded;
-
   },
 
   decode: ( encoded: string ): Float32Array => {
 
-    const parts =  encoded.split ( '|' );
-    const precision = parts[0];
-    const length = Number ( parts[1] );
-    const bytes = atob ( parts[2] );
+    const precision = Number ( encoded[0] );
+    const bytes = atob ( encoded.slice ( 1 ) );
 
-    const buffer = new Buffer ( length );
+    const buffer = new Buffer ( bytes.length / precision );
     const uint8 = new Uint8Array ( buffer.buffer );
 
-    if ( precision === 'f32' ) {
+    if ( precision === 4 ) {
 
       for ( let s = 0, i = 0, l = bytes.length; i < l; s += 4, i += 4 ) {
         uint8[s + 0] = bytes[i + 0].charCodeAt ( 0 );
@@ -61,7 +58,7 @@ const Encoder = {
         uint8[s + 3] = bytes[i + 3].charCodeAt ( 0 );
       }
 
-    } else if ( precision === 'f16' ) {
+    } else if ( precision === 2 ) {
 
       for ( let s = 0, i = 0, l = bytes.length; i < l; s += 4, i += 2 ) {
         uint8[s + 0] = 0;
