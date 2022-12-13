@@ -78,6 +78,10 @@ type SoftmaxOptions = {};
 
 /* LAYERS - CLASSES */
 
+type LayerAbstractActivation = import ( '~/layers/abstract_activation' ).default;
+type LayerAbstractHidden = import ( '~/layers/abstract_hidden' ).default;
+type LayerAbstractInput = import ( '~/layers/abstract_input' ).default;
+type LayerAbstractOutput = import ( '~/layers/abstract_output' ).default;
 type LayerInput = import ( '~/layers/input' ).default;
 type LayerConv = import ( '~/layers/conv' ).default;
 type LayerDense = import ( '~/layers/dense' ).default;
@@ -91,11 +95,12 @@ type LayerTanh = import ( '~/layers/tanh' ).default;
 type LayerRegression = import ( '~/layers/regression' ).default;
 type LayerSoftmax = import ( '~/layers/softmax' ).default;
 
+type LayersAbstract = LayerAbstractActivation | LayerAbstractHidden | LayerAbstractInput | LayerAbstractOutput;
 type LayersInput = LayerInput;
 type LayersHidden = LayerConv | LayerDense | LayerDropout | LayerPool | LayersActivation;
 type LayersActivation = LayerLeakyRelu | LayerMaxout | LayerRelu | LayerSigmoid | LayerTanh;
 type LayersOutput = LayerRegression | LayerSoftmax;
-type Layers = LayersInput | LayersHidden | LayersOutput;
+type Layers = LayersAbstract | LayersInput | LayersHidden | LayersOutput;
 
 /* TRAINERS */
 
@@ -166,15 +171,15 @@ type NeuralNetworkLayersOutput = NeuralNetworkLayerRegression | NeuralNetworkLay
 type NeuralNetworkLayers = NeuralNetworkLayersInput | NeuralNetworkLayersHidden | NeuralNetworkLayersOutput;
 
 type NeuralNetworkLayersDescriptions = [
-  NeuralNetworkLayersInput,
-  ...NeuralNetworkLayersHidden[],
-  NeuralNetworkLayersOutput
+  NeuralNetworkLayersInput | LayerAbstractInput,
+  ...(NeuralNetworkLayersHidden | LayerAbstractHidden)[],
+  NeuralNetworkLayersOutput | LayerAbstractOutput
 ];
 
 type NeuralNetworkLayersResolved = [
-  LayersInput,
-  ...LayersHidden[],
-  LayersOutput
+  LayersInput | LayerAbstractInput,
+  ...(LayersHidden | LayerAbstractHidden)[],
+  LayersOutput | LayerAbstractOutput
 ];
 
 type NeuralNetworkOptions = {
@@ -199,7 +204,7 @@ export type {InputOptions};
 export type {ConvOptions, DenseOptions, DropoutOptions, PoolOptions};
 export type {LeakyReluOptions, MaxoutOptions, ReluOptions, SigmoidOptions, TanhOptions};
 export type {RegressionOptions, SoftmaxOptions};
-export type {Layers};
+export type {LayersAbstract, LayersInput, LayersHidden, LayersActivation, LayersOutput, Layers};
 export type {TrainerAbstractOptions, TrainerAdamOptions, TrainerAdagradOptions, TrainerAdadeltaOptions, TrainerNesterovOptions, TrainerSGDOptions, TrainerResult};
 export type {NeuralNetworkLayers, NeuralNetworkLayersDescriptions, NeuralNetworkLayersResolved, NeuralNetworkOptions};
 export type {ParamsAndGrads, Precision};

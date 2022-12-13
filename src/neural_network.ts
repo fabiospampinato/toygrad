@@ -2,12 +2,12 @@
 /* IMPORT */
 
 import Layers from '~/layers';
+import Abstract from '~/layers/abstract';
 import AbstractInput from '~/layers/abstract_input';
 import AbstractHidden from '~/layers/abstract_hidden';
 import AbstractOutput from '~/layers/abstract_output';
-import type Abstract from '~/layers/abstract';
 import type Tensor from '~/tensor';
-import type {NeuralNetworkLayers, NeuralNetworkLayersDescriptions, NeuralNetworkLayersResolved, NeuralNetworkOptions, ParamsAndGrads, Precision} from '~/types';
+import type {LayersAbstract, NeuralNetworkLayers, NeuralNetworkLayersDescriptions, NeuralNetworkLayersResolved, NeuralNetworkOptions, ParamsAndGrads, Precision} from '~/types';
 
 /* MAIN */
 
@@ -75,7 +75,10 @@ class NeuralNetwork {
 
   resolve ( layers: NeuralNetworkLayersDescriptions ): Abstract[] {
 
-    const resolveLayer = ( layer: NeuralNetworkLayers, prev?: Abstract ) => {
+    const resolveLayer = ( layer: NeuralNetworkLayers | LayersAbstract, prev?: Abstract ) => {
+
+      if ( layer instanceof Abstract ) return layer;
+
       switch ( layer.type ) {
         /* INPUT */
         case 'input': return new Layers.Input ( layer, prev );
@@ -96,6 +99,7 @@ class NeuralNetwork {
         /* DEFAULT */
         default: throw new Error ( 'Unknown layer type' );
       }
+
     };
 
     let prev: Abstract | undefined;
