@@ -21,7 +21,7 @@ class Tensor {
 
   /* CONSTRUCTOR */
 
-  constructor ( sx: number, sy: number, sz: number, value?: Float32Array | ArrayLike<number> | number ) {
+  constructor ( sx: number, sy: number, sz: number, value?: Float32Array | ArrayLike<number> | number, dvalue?: Float32Array ) {
 
     this.sx = sx;
     this.sy = sy;
@@ -36,12 +36,10 @@ class Tensor {
       const get = () => randn ( 0, scale );
 
       this.w = new Buffer ( this.length ).map ( get );
-      this.dw = new Buffer ( this.length );
 
     } else if ( isNumber ( value ) ) { // With a fixed value
 
       this.w = new Buffer ( this.length );
-      this.dw = new Buffer ( this.length );
 
       if ( value !== 0 ) {
         this.w.fill ( value );
@@ -50,14 +48,16 @@ class Tensor {
     } else if ( isBuffer ( value ) ) { // With an existing buffer
 
       this.w = value;
-      this.dw = new Buffer ( this.length );
 
     } else { // With an existing array
 
       this.w = new Buffer ( value );
-      this.dw = new Buffer ( this.length );
 
     }
+
+    /* INTIALIZING D-WEIGHTS */
+
+    this.dw = dvalue || new Buffer ( this.length );
 
   }
 
