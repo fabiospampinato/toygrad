@@ -19,6 +19,7 @@ class Dense extends AbstractHidden<DenseOptions> {
   l1decay: number;
   l2decay: number;
 
+  biased: boolean;
   biases: Tensor;
   filters: Tensor[];
 
@@ -36,7 +37,8 @@ class Dense extends AbstractHidden<DenseOptions> {
     this.l1decay = options.l1decay ?? 0;
     this.l2decay = options.l2decay ?? 1;
 
-    this.biases = options._biases ? new Tensor ( 1, 1, this.osz, Encoder.decode ( options._biases ) ) : new Tensor ( 1, 1, this.osz, this.bias );
+    this.biased = ( this.bias !== -1 );
+    this.biases = this.biased ? ( options._biases ? new Tensor ( 1, 1, this.osz, Encoder.decode ( options._biases ) ) : new Tensor ( 1, 1, this.osz, this.bias ) ) : new Tensor ( 1, 1, this.osz, 0 );
     this.filters = options._filters ? options._filters.map ( filter => new Tensor ( 1, 1, this.il, Encoder.decode ( filter ) ) ) : range ( 0, this.osz ).map ( () => new Tensor ( 1, 1, this.il ) );
 
   }
@@ -68,6 +70,7 @@ class Dense extends AbstractHidden<DenseOptions> {
   backward (): void {
 
     const input = this.it;
+    const biased = this.biased;
 
     input.dw = new Buffer ( input.length );
 
@@ -78,7 +81,9 @@ class Dense extends AbstractHidden<DenseOptions> {
         input.dw[d] += tfi.w[d] * chain_grad;
         tfi.dw[d] += input.w[d] * chain_grad;
       }
-      this.biases.dw[i] += chain_grad;
+      if ( biased ) {
+        this.biases.dw[i] += chain_grad;
+      }
     }
 
   }
@@ -87,7 +92,7 @@ class Dense extends AbstractHidden<DenseOptions> {
 
     return {
       ...this.options,
-      _biases: Encoder.encode ( this.biases.w, precision ),
+      _biases: this.biased ? Encoder.encode ( this.biases.w, precision ) : undefined,
       _filters: this.filters.map ( filter => Encoder.encode ( filter.w, precision ) )
     };
 
@@ -96,6 +101,9 @@ class Dense extends AbstractHidden<DenseOptions> {
   getParamsAndGrads (): ParamsAndGrads[] {
 
     const filters = this.filters.map ( filter => ({ params: filter.w, grads: filter.dw, l1decay: this.l1decay, l2decay: this.l2decay }) );
+
+    if ( !this.biased ) return filters;
+
     const biases = { params: this.biases.w, grads: this.biases.dw, l1decay: 0, l2decay: 0 };
 
     return [...filters, biases];
