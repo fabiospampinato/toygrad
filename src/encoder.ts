@@ -14,24 +14,37 @@ const Encoder = {
 
     const uint8 = new Uint8Array ( buffer.buffer );
 
-    let bytes = '';
-
     if ( precision === 'f32' ) {
 
-      for ( let i = 0, l = uint8.length; i < l; i += 1 ) {
-        bytes += String.fromCharCode ( uint8[i] );
+      let bytes1 = '';
+      let bytes2 = '';
+      let bytes3 = '';
+      let bytes4 = '';
+
+      for ( let i = 0, l = uint8.length; i < l; i += 4 ) {
+
+        bytes1 += String.fromCharCode ( uint8[i + 0] );
+        bytes2 += String.fromCharCode ( uint8[i + 1] );
+        bytes3 += String.fromCharCode ( uint8[i + 2] );
+        bytes4 += String.fromCharCode ( uint8[i + 3] );
+
       }
 
-      return `4${btoa ( bytes )}`;
+      return `4${btoa ( `${bytes1}${bytes2}${bytes3}${bytes4}` )}`;
 
     } else if ( precision === 'f16' ) {
 
+      let bytes3 = '';
+      let bytes4 = '';
+
       for ( let i = 0, l = uint8.length; i < l; i += 4 ) {
-        bytes += String.fromCharCode ( uint8[i + 2] );
-        bytes += String.fromCharCode ( uint8[i + 3] );
+
+        bytes3 += String.fromCharCode ( uint8[i + 2] );
+        bytes4 += String.fromCharCode ( uint8[i + 3] );
+
       }
 
-      return `2${btoa ( bytes )}`;
+      return `2${btoa ( `${bytes3}${bytes4}` )}`;
 
     } else {
 
@@ -45,26 +58,39 @@ const Encoder = {
 
     const precision = Number ( encoded[0] );
     const bytes = atob ( encoded.slice ( 1 ) );
+    const bytesChunkLength = bytes.length / precision;
 
     const buffer = new Buffer ( bytes.length / precision );
     const uint8 = new Uint8Array ( buffer.buffer );
 
     if ( precision === 4 ) {
 
-      for ( let s = 0, i = 0, l = bytes.length; i < l; s += 4, i += 4 ) {
-        uint8[s + 0] = bytes[i + 0].charCodeAt ( 0 );
-        uint8[s + 1] = bytes[i + 1].charCodeAt ( 0 );
-        uint8[s + 2] = bytes[i + 2].charCodeAt ( 0 );
-        uint8[s + 3] = bytes[i + 3].charCodeAt ( 0 );
+      const bytes1 = bytes.slice ( bytesChunkLength * 0, bytesChunkLength * 1 );
+      const bytes2 = bytes.slice ( bytesChunkLength * 1, bytesChunkLength * 2 );
+      const bytes3 = bytes.slice ( bytesChunkLength * 2, bytesChunkLength * 3 );
+      const bytes4 = bytes.slice ( bytesChunkLength * 3, bytesChunkLength * 4 );
+
+      for ( let s = 0, i = 0, l = bytesChunkLength; i < l; s += 4, i += 1 ) {
+
+        uint8[s + 0] = bytes1[i].charCodeAt ( 0 );
+        uint8[s + 1] = bytes2[i].charCodeAt ( 0 );
+        uint8[s + 2] = bytes3[i].charCodeAt ( 0 );
+        uint8[s + 3] = bytes4[i].charCodeAt ( 0 );
+
       }
 
     } else if ( precision === 2 ) {
 
-      for ( let s = 0, i = 0, l = bytes.length; i < l; s += 4, i += 2 ) {
+      const bytes3 = bytes.slice ( bytesChunkLength * 0, bytesChunkLength * 1 );
+      const bytes4 = bytes.slice ( bytesChunkLength * 1, bytesChunkLength * 2 );
+
+      for ( let s = 0, i = 0, l = bytesChunkLength; i < l; s += 4, i += 1 ) {
+
         uint8[s + 0] = 0;
         uint8[s + 1] = 0;
-        uint8[s + 2] = bytes[i + 0].charCodeAt ( 0 );
-        uint8[s + 3] = bytes[i + 1].charCodeAt ( 0 );
+        uint8[s + 2] = bytes3[i].charCodeAt ( 0 );
+        uint8[s + 3] = bytes4[i].charCodeAt ( 0 );
+
       }
 
     } else {
