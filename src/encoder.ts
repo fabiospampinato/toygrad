@@ -46,6 +46,23 @@ const Encoder = {
 
       return `2${btoa ( `${bytes3}${bytes4}` )}`;
 
+    } else if ( precision === 'f8' ) {
+
+      const max = Math.max ( ...Array.from ( buffer ).map ( Math.abs ) );
+      const scale = Number ( ( 127 / max ).toFixed ( 1 ) );
+
+      if ( max > 127 || scale < 1 ) throw new Error ( 'Unsupported encoding, max value out of range' );
+
+      let bytes = '';
+
+      for ( let i = 0, l = buffer.length; i < l; i += 1 ) {
+
+        bytes += String.fromCharCode ( Math.trunc ( ( buffer[i] * scale ) + 127 ) );
+
+      }
+
+      return `1${scale}|${btoa ( bytes )}`;
+
     } else {
 
       throw new Error ( 'Unsupported precision' );
@@ -57,7 +74,9 @@ const Encoder = {
   decode: ( encoded: string ): Float32Array => {
 
     const precision = Number ( encoded[0] );
-    const bytes = atob ( encoded.slice ( 1 ) );
+    const separatorIndex = encoded.indexOf ( '|' );
+    const bytesIndex = ( separatorIndex >= 0 ) ? separatorIndex + 1 : 1;
+    const bytes = atob ( encoded.slice ( bytesIndex ) );
     const bytesChunkLength = bytes.length / precision;
 
     const buffer = new Buffer ( bytes.length / precision );
@@ -90,6 +109,16 @@ const Encoder = {
         uint8[s + 1] = 0;
         uint8[s + 2] = bytes3[i].charCodeAt ( 0 );
         uint8[s + 3] = bytes4[i].charCodeAt ( 0 );
+
+      }
+
+    } else if ( precision === 1 ) {
+
+      const scale = Number ( encoded.slice ( 1, separatorIndex ) );
+
+      for ( let i = 0, l = bytesChunkLength; i < l; i += 1 ) {
+
+        buffer[i] = ( bytes[i].charCodeAt ( 0 ) - 127 ) / scale;
 
       }
 
