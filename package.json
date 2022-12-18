@@ -2,7 +2,7 @@
   "name": "toygrad",
   "repository": "github:fabiospampinato/toygrad",
   "description": "A toy library for building simple neural networks which can be serialized to compact JSON.",
-  "version": "2.5.0",
+  "version": "2.5.1",
   "type": "module",
   "main": "dist/index.js",
   "exports": "./dist/index.js",
