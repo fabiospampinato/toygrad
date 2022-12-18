@@ -49,7 +49,7 @@ const Encoder = {
     } else if ( precision === 'f8' ) {
 
       const max = Math.max ( ...Array.from ( buffer ).map ( Math.abs ) );
-      const scale = Number ( ( 127 / max ).toFixed ( 1 ) );
+      const scale = Number ( ( 126 / max ).toFixed ( 1 ) );
 
       if ( max > 127 || scale < 1 ) throw new Error ( 'Unsupported encoding, max value out of range' );
 
