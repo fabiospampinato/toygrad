@@ -4,6 +4,11 @@
 import Buffer from '~/buffer';
 import type {Precision} from '~/types';
 
+/* HELPERS */
+
+const ALPHABET_86 = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#$%&()[]{}<>*+-:;=@^_~!';
+const IALPHABET_86 = Object.fromEntries ( ALPHABET_86.split ( '' ).map ( ( char, i ) => [char, i] ) );
+
 /* MAIN */
 
 const Encoder = {
@@ -63,6 +68,23 @@ const Encoder = {
 
       return `1${scale}|${btoa ( bytes )}`;
 
+    } else if ( precision === 'f6' ) {
+
+      const max = Math.max ( ...Array.from ( buffer ).map ( Math.abs ) );
+      const scale = ( max === 0 ) ? 1 : Number ( ( 126 / max ).toFixed ( 1 ) );
+
+      if ( max > 127 || scale < 1 ) throw new Error ( 'Unsupported encoding, max value out of range' );
+
+      let bytes = '';
+
+      for ( let i = 0, l = buffer.length; i < l; i += 1 ) {
+
+        bytes += ALPHABET_86[Math.round ( Math.trunc ( ( buffer[i] * scale ) + 127 ) / 3 )];
+
+      }
+
+      return `1-${scale}|${bytes}`;
+
     } else {
 
       throw new Error ( 'Unsupported precision' );
@@ -75,8 +97,10 @@ const Encoder = {
 
     const precision = Number ( encoded[0] );
     const separatorIndex = encoded.indexOf ( '|' );
+    const isF6 = ( encoded[1] === '-' );
     const bytesIndex = ( separatorIndex >= 0 ) ? separatorIndex + 1 : 1;
-    const bytes = atob ( encoded.slice ( bytesIndex ) );
+    const bytesEncoded = encoded.slice ( bytesIndex );
+    const bytes = isF6 ? bytesEncoded : atob ( bytesEncoded );
     const bytesChunkLength = bytes.length / precision;
 
     const buffer = new Buffer ( bytes.length / precision );
@@ -112,13 +136,23 @@ const Encoder = {
 
       }
 
-    } else if ( precision === 1 ) {
+    } else if ( precision === 1 && !isF6 ) {
 
       const scale = Number ( encoded.slice ( 1, separatorIndex ) );
 
       for ( let i = 0, l = bytesChunkLength; i < l; i += 1 ) {
 
         buffer[i] = ( bytes[i].charCodeAt ( 0 ) - 127 ) / scale;
+
+      }
+
+    } else if ( precision === 1 && isF6 ) {
+
+      const scale = Number ( encoded.slice ( 2, separatorIndex ) );
+
+      for ( let i = 0, l = bytesChunkLength; i < l; i += 1 ) {
+
+        buffer[i] = ( ( IALPHABET_86[bytes[i]] * 3 ) - 127 ) / scale;
 
       }
 

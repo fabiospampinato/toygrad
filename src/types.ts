@@ -195,7 +195,7 @@ type ParamsAndGrads = {
   l2decay: number
 };
 
-type Precision = 'f8' | 'f16' | 'f32';
+type Precision = 'f6' | 'f8' | 'f16' | 'f32';
 
 /* EXPORT */
 
