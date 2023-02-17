@@ -1,6 +1,6 @@
 
 // DATASET: https://www.kaggle.com/datasets/oddrationale/mnist-in-csv
-// DEMO: https://playground.solidjs.com/anonymous/14ec5b8a-a519-4dbc-88b6-0ba00f445f9e
+// DEMO: https://playground.solidjs.com/anonymous/7b1e3399-8b30-4fdb-9675-b85a5ab2d6dc
 
 /* IMPORT */
 
