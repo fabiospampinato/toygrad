@@ -15,7 +15,7 @@
     "example:all": "npm run example:xor && npm run example:mnist",
     "example:xor": "node examples/xor.js",
     "example:mnist": "node examples/mnist.js",
-    "prepublishOnly": "npm run clean && npm run compile"
+    "prepublishOnly": "tsex prepare"
   },
   "keywords": [
     "toy",
@@ -25,10 +25,10 @@
     "network"
   ],
   "devDependencies": {
-    "fava": "^0.0.7",
+    "fava": "^0.2.0",
     "lodash": "^4.17.21",
-    "mathjs": "^11.5.0",
-    "tsex": "^1.1.4",
-    "typescript": "^4.9.3"
+    "mathjs": "^11.5.1",
+    "tsex": "^2.2.0",
+    "typescript": "^4.9.5"
   }
 }
