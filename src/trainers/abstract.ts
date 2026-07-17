@@ -75,7 +75,7 @@ class Abstract {
 
       // initialize lists for accumulators. Will only be done once on first iteration
       if(this.gsum.length === 0 && (this.method !== 'sgd' || this.momentum > 0)) {
-        // only vanilla sgd doesnt need either lists
+        // only vanilla sgd doesn't need either lists
         // momentum needs gsum
         // adagrad needs gsum
         // adam and adadelta needs gsum and xsum
@@ -144,7 +144,7 @@ class Abstract {
               p[j] +=  - this.learningRate * gij;
             }
           } else {
-            throw new Error ( 'Unsupposed trainer' );
+            throw new Error ( 'Unsupported trainer' );
           }
           g[j] = 0; // zero out gradient so that we can begin accumulating anew
         }
