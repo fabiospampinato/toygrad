@@ -55,7 +55,7 @@ class Tensor {
 
     }
 
-    /* INTIALIZING D-WEIGHTS */
+    /* INITIALIZING D-WEIGHTS */
 
     this.dw = dvalue || new Buffer ( this.length );
 
